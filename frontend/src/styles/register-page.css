@@ -1,0 +1,124 @@
+/* BACKGROUND */
+.register-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(20,20,20,0.55);
+}
+
+/* LEFT SIDE */
+.register-header {
+    position: absolute;
+    top: 0; left: 0;
+    width: 50vw;
+    height: 100vh;
+    z-index: 10;
+}
+
+.mudmauler-text {
+    margin-top: 35px;
+    margin-left: 40px;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: white;
+}
+
+.welcome-banner {
+    position: absolute;
+    bottom: 70px;
+    left: 40px;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+}
+
+.highlight {
+    color: #A00000;
+}
+
+/* RIGHT SIDE FORM */
+.register-center {
+    position: absolute;
+    top: 50%;
+    right: 8%;
+    transform: translateY(-50%);
+    z-index: 20;
+}
+
+/* CARD */
+.register-card {
+    width: 430px;
+    background: white;
+    padding: 50px 45px;
+    border-radius: 25px;
+    box-shadow: 0 2px 22px rgba(0,0,0,0.15);
+}
+
+/* REGISTER TITLE */
+.register-title {
+    font-size: 2.3rem;
+    font-weight: 800;
+    margin: 0;
+    padding: 0;
+    color: #000; /* BLACK TEXT */
+}
+
+
+/* SUBTITLE */
+.register-desc {
+    margin-top: 5px;
+    margin-bottom: 25px;
+    color: #444;
+    font-size: 1.1rem;
+}
+
+/* FORM GROUP (Fix spacing) */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 18px;
+}
+
+/* LABEL */
+.form-group label {
+    color: #B00000;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* INPUT */
+.form-group input {
+    padding: 13px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    font-size: 1rem;
+}
+
+/* BUTTON */
+.register-btn {
+    margin-top: 5px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.15rem;
+    font-weight: 700;
+    background: #B00000;
+    color: white;
+    cursor: pointer;
+}
+
+.register-btn:hover {
+    background: #222;
+}
