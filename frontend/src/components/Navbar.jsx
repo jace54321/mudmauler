@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-// import { FaShoppingCart } from "react-icons/fa"; // Uncomment if you use the icon
+import { FaShoppingCart } from "react-icons/fa"; // Uncomment if you use the icon
 
 const Navbar = ({ isSignedIn, setIsSignedIn }) => {
     const navigate = useNavigate();
@@ -20,8 +20,7 @@ const Navbar = ({ isSignedIn, setIsSignedIn }) => {
             </ul>
             <div className="nav-actions">
                 <button className="cart-btn">
-                    {/* <FaShoppingCart size={20} /> */}
-                    🛒
+                    <FaShoppingCart size={20} />
                     <span className="cart-count">0</span>
                 </button>
                 {!isSignedIn ? (

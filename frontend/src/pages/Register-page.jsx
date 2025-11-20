@@ -21,7 +21,7 @@ const RegisterPage = () => {
             [e.target.name]: e.target.value,
         });
     };
-
+// post req
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');

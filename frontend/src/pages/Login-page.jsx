@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "../styles/login-page.css";
 import tire from '../assets/tire-img.png';
 
-// IMPORTANT—Add setIsSignedIn as a prop!
 const LoginPage = ({ setIsSignedIn }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -24,7 +23,7 @@ const LoginPage = ({ setIsSignedIn }) => {
             });
 
             if (response.ok) {
-                setIsSignedIn(true); // Update state in App, which updates Navbar!
+                setIsSignedIn(true); // Updates Navbar
                 setSuccess("Login successful!");
                 navigate('/');
             } else {
