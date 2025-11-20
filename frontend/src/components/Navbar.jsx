@@ -1,23 +1,22 @@
-import React, { useState } from "react";
-// import { FaShoppingCart } from "react-icons/fa"; // Uncomment when using this icon
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+// import { FaShoppingCart } from "react-icons/fa"; // Uncomment if you use the icon
 
-const Navbar = () => {
-    // Simulate authentication state (replace with your real logic/context/auth hook)
-    const [isSignedIn, setIsSignedIn] = useState(false);
+const Navbar = ({ isSignedIn, setIsSignedIn }) => {
+    const navigate = useNavigate();
 
-    // Simulate logout (replace with your real logout logic)
     const handleLogout = () => {
-        setIsSignedIn(false); // Remove token, call backend, etc.
-        // Optionally redirect to home
+        setIsSignedIn(false);
+        navigate("/login"); // Redirect to login page after logout
     };
 
     return (
         <nav className="navbar">
             <div className="logo">MUDMAULER</div>
             <ul className="nav-links">
-                <li><a href="/shop">Shop</a></li>
-                <li><a href="/about">About</a></li>
-                <li><a href="/contact">Contact</a></li>
+                <li><Link to="/shop">Shop</Link></li>
+                <li><Link to="/about">About</Link></li>
+                <li><Link to="/contact">Contact</Link></li>
             </ul>
             <div className="nav-actions">
                 <button className="cart-btn">
@@ -26,11 +25,8 @@ const Navbar = () => {
                     <span className="cart-count">0</span>
                 </button>
                 {!isSignedIn ? (
-                    <>
-                        <a href="/login" className="quote-btn">Login</a>
-                    </>
+                    <Link to="/login" className="quote-btn">Login</Link>
                 ) : (
-                    // Show Logout if signed in
                     <button className="quote-btn" onClick={handleLogout}>Logout</button>
                 )}
             </div>

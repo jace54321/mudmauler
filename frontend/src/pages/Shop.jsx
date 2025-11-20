@@ -7,7 +7,6 @@ import products from "../data/products";
 
 const Shop = () => (
     <div className="landing-container">
-        <Navbar />
         <main style={{ padding: "38px 0" }}>
             <div style={{ padding: "0 40px" }}>
                 <h2 style={{

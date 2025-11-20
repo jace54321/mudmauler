@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/register-page.css';
 import tire from '../assets/tire-img.png';
 
@@ -12,6 +13,7 @@ const RegisterPage = () => {
 
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -42,7 +44,10 @@ const RegisterPage = () => {
             });
 
             if (response.ok) {
-                setSuccess("Registration successful! Please login.");
+                setSuccess("Registration successful! Redirecting to login...");
+                setTimeout(() => {
+                    navigate('/login');
+                }, 1500); // Redirects after 1.5s
                 setFormData({ email: '', username: '', password: '', confirmPassword: '' });
             } else {
                 const data = await response.json();
@@ -81,7 +86,6 @@ const RegisterPage = () => {
                                 required
                             />
                         </div>
-
                         <div className="form-group">
                             <label>Username</label>
                             <input
@@ -93,7 +97,6 @@ const RegisterPage = () => {
                                 required
                             />
                         </div>
-
                         <div className="form-group">
                             <label>Password</label>
                             <input
@@ -105,7 +108,6 @@ const RegisterPage = () => {
                                 required
                             />
                         </div>
-
                         <div className="form-group">
                             <label>Confirm Password</label>
                             <input
@@ -117,12 +119,9 @@ const RegisterPage = () => {
                                 required
                             />
                         </div>
-
                         <button type="submit" className="register-btn">Register</button>
-
                         {error && <p style={{ color: 'red' }}>{error}</p>}
                         {success && <p style={{ color: 'green' }}>{success}</p>}
-
                         <div className="signup-link">
                             Already have an account? <a href="/login">Login</a>
                         </div>

@@ -1,14 +1,11 @@
 import React from "react";
 import "../styles/landing-page.css";
 import hero from "../assets/hero-bg.jpg"; // Make sure this file path is correct in your setup
-import Navbar from "../components/Navbar";
 import { FaShoppingCart } from "react-icons/fa";
 
 function LandingPage() {
     return (
         <div className="landing-container">
-            <Navbar />
-
             {/* HERO */}
             <section className="hero" style={{ backgroundImage: `url(${hero})` }}>
                 <div className="overlay"></div>
@@ -46,7 +43,7 @@ function LandingPage() {
                         <h3>Extreme Terrain</h3>
                         <p>Built for the toughest mud, rocks, and trails</p>
                     </div>
-                    <div className="mudjunkies-card active">
+                    <div className="mudjunkies-card">
                         <div className="mudjunkies-icon all-season">
                             {/* Mountain SVG */}
                             <svg height="54" width="54" fill="none">
