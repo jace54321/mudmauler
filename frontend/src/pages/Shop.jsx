@@ -1,35 +1,27 @@
 import React from "react";
-import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CategorySidebar from "../components/CategorySidebar";
 import ProductGrid from "../components/ProductGrid";
 import products from "../data/products";
 
 const Shop = () => (
-    <div className="landing-container">
-        <Navbar />
-        <main style={{ padding: "38px 0" }}>
-            <div style={{ padding: "0 40px" }}>
-                <h2 style={{
-                    fontFamily: "'Poppins', sans-serif",
-                    fontWeight: 900,
-                    fontSize: "1.2rem",
-                    letterSpacing: ".05em",
-                    margin: 0,
-                    color: "#111"
-                }}>
+    <div className="shop-container">
+        <main className="shop-main">
+            <div className="shop-header">
+                <h2 className="shop-title">
                     New Arrivals
                 </h2>
-                <span style={{ fontSize: "0.98rem", color: "#888" }}>
+                <span className="shop-subtitle">
                   Check out the latest products
                 </span>
             </div>
-            <section className="shop-grid-section">
+            <div className="shop-content">
                 <CategorySidebar />
-                <ProductGrid products={products} />
-            </section>
+                <ProductGrid products={products && Array.isArray(products) ? products : []} />
+            </div>
         </main>
         <Footer />
     </div>
 );
+
 export default Shop;
