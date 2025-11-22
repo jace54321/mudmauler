@@ -1,14 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { Routes, Route, useLocation } from "react-router-dom";
 import LandingPage from "./pages/Landing-page.jsx";
 import LoginPage from "./pages/Login-page.jsx";
 import RegisterPage from "./pages/Register-page.jsx";
-import ShopPage from "./pages/Shop.jsx";
+import Shop from "./pages/Shop.jsx";
+import Carts from "./pages/Carts.jsx";
+import Profile from "./pages/Profile-page.jsx";
+
+const AUTH_KEY = "isSignedIn";
 
 function App() {
-    const [isSignedIn, setIsSignedIn] = useState(false);
+    // Read initial value from localStorage
+    const getInitialSignedIn = () => {
+        const stored = localStorage.getItem(AUTH_KEY);
+        return stored === "true";
+    };
+
+    const [isSignedIn, setIsSignedIn] = useState(getInitialSignedIn());
     const location = useLocation();
+
+    // When isSignedIn changes, update localStorage
+    useEffect(() => {
+        localStorage.setItem(AUTH_KEY, isSignedIn ? "true" : "false");
+    }, [isSignedIn]);
 
     // Routes where Navbar should be hidden
     const hideNavbarRoutes = ["/login", "/register"];
@@ -22,7 +37,9 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage setIsSignedIn={setIsSignedIn} />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/cart" element={<Carts />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
         </>
     );
