@@ -23,18 +23,32 @@ const LoginPage = ({ setIsSignedIn }) => {
                 body: JSON.stringify({ email, password })
             });
 
+            // ALWAYS parse JSON safely
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (err) {
+                setError("Invalid response from server");
+                return;
+            }
+
             if (response.ok) {
-                setIsSignedIn(true); // Update state in App, which updates Navbar!
+                // SUCCESS — backend returned sessionId + message
+                setIsSignedIn(true);
+
+                // store sessionId for protected routes
+                localStorage.setItem("sessionId", data.sessionId);
+
                 setSuccess("Login successful!");
-                navigate('/');
+                navigate('/dashboard');
             } else {
-                const data = await response.json();
-                setError(data.message || 'Login failed');
+                setError(data.message || "Login failed");
             }
         } catch (err) {
-            setError('Error connecting to server');
+            setError("Error connecting to server");
         }
     };
+
 
     return (
         <div className="login-container">

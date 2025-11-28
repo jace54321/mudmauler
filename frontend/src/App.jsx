@@ -1,19 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+
 import LandingPage from "./pages/Landing-page.jsx";
 import LoginPage from "./pages/Login-page.jsx";
-import RegisterPage from "./pages/Register-page.jsx"; // Import your register page
-import ShopPage from "./pages/Shop.jsx";
+import RegisterPage from "./pages/Register-page.jsx";
+import DashboardPage from "./pages/Dashboard-page.jsx";
 
 function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/shop" element={<ShopPage />} />
-    </Routes>
-  );
+    // Track login state using sessionId
+    const [isSignedIn, setIsSignedIn] = useState(
+        !!localStorage.getItem("sessionId")
+    );
+
+    return (
+        <Routes>
+            {/* Landing */}
+            <Route path="/" element={<LandingPage />} />
+
+            {/* Register */}
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Login — pass setIsSignedIn */}
+            <Route
+                path="/login"
+                element={<LoginPage setIsSignedIn={setIsSignedIn} />}
+            />
+
+            {/* Dashboard — Protected */}
+            <Route
+                path="/dashboard"
+                element={
+                    isSignedIn ? (
+                        <DashboardPage />
+                    ) : (
+                        <LoginPage setIsSignedIn={setIsSignedIn} />
+                    )
+                }
+            />
+        </Routes>
+    );
 }
 
 export default App;
