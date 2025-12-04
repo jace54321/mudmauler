@@ -1,9 +1,25 @@
-// ✅ Added Link import so navigation works without full page reload
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaShoppingCart, FaUserCircle } from "react-icons/fa";
 import "../styles/DashboardNavbar.css";
 
-const DashboardNavbar = ({ onMenuOpen }) => {
+const MergedNavbar = ({ onMenuOpen, setIsSignedIn }) => {
+  const navigate = useNavigate();
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <nav className="dashboard-nav">
       <div className="nav-content">
@@ -23,15 +39,11 @@ const DashboardNavbar = ({ onMenuOpen }) => {
           <span className="logo-subtitle">PERFORMANCE TIRES</span>
         </div>
 
-        {/* Desktop Nav Links */}
+        {/* Links */}
         <div className="nav-links">
-          {/* ❗ CHANGED <a> TO <Link> (fixes navigation) */}
-          <Link to="/dashboard" className="nav-link active">Home</Link>
+          <Link to="/" className="nav-link">Home</Link>
           <Link to="/about" className="nav-link">About</Link>
-
-          {/* ❗ FIXED: Tires now goes to /shop */}
           <Link to="/shop" className="nav-link">Tires</Link>
-
           <Link to="/news" className="nav-link">News</Link>
           <Link to="/dealers" className="nav-link">Dealers</Link>
         </div>
@@ -45,9 +57,47 @@ const DashboardNavbar = ({ onMenuOpen }) => {
           <input type="search" placeholder="Search..." className="search-input" />
         </div>
 
+        {/* Right Icons */}
+        <div className="nav-actions" ref={dropdownRef}>
+
+          {/* Cart */}
+          <button className="cart-btn" onClick={() => navigate("/cart")}>
+            <FaShoppingCart size={20} color="white" />
+          </button>
+
+          {/* Profile with Dropdown */}
+          <button
+            className="profile-btn"
+            onClick={() => setDropdownOpen((prev) => !prev)}
+            aria-label="Profile"
+          >
+            <FaUserCircle size={36} color="white" />
+          </button>
+
+          {/* Dropdown */}
+          {dropdownOpen && (
+            <div className="profile-dropdown">
+              <button className="dropdown-item" onClick={() => navigate("/settings")}>
+                Settings
+              </button>
+
+              <button
+                className="dropdown-item logout"
+                onClick={() => {
+                  setIsSignedIn(false);
+                  setDropdownOpen(false);
+                  navigate("/login");
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          )}
+
+        </div>
       </div>
     </nav>
   );
 };
 
-export default DashboardNavbar;
+export default MergedNavbar;

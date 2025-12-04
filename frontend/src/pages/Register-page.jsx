@@ -6,7 +6,10 @@ import tire from '../assets/tire-img.png';
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
         email: '',
-        username: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
+        address: '',
         password: '',
         confirmPassword: ''
     });
@@ -21,7 +24,7 @@ const RegisterPage = () => {
             [e.target.name]: e.target.value,
         });
     };
-// post req
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -38,17 +41,27 @@ const RegisterPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: formData.email,
-                    username: formData.username,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    phone: formData.phone,
+                    address: formData.address,
                     password: formData.password
                 }),
             });
 
             if (response.ok) {
                 setSuccess("Registration successful! Redirecting to login...");
-                setTimeout(() => {
-                    navigate('/login');
-                }, 1500); // Redirects after 1.5s
-                setFormData({ email: '', username: '', password: '', confirmPassword: '' });
+                setTimeout(() => navigate('/login'), 1500);
+
+                setFormData({
+                    email: '',
+                    firstName: '',
+                    lastName: '',
+                    phone: '',
+                    address: '',
+                    password: '',
+                    confirmPassword: ''
+                });
             } else {
                 const data = await response.json();
                 setError(data.message || 'Registration failed');
@@ -75,53 +88,96 @@ const RegisterPage = () => {
                     <p className="register-desc">Create your account to get started</p>
 
                     <form className="register-form" onSubmit={handleSubmit}>
+
+                        {/* EMAIL */}
                         <div className="form-group">
-                            <label>Email address</label>
+                            <label>Email Address</label>
                             <input
                                 type="email"
                                 name="email"
-                                placeholder="Enter your email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
+
+                        {/* FIRST + LAST NAME */}
+                        <div className="name-row">
+                            <div className="form-group half">
+                                <label>First Name</label>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group half">
+                                <label>Last Name</label>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* PHONE */}
                         <div className="form-group">
-                            <label>Username</label>
+                            <label>Phone Number</label>
                             <input
                                 type="text"
-                                name="username"
-                                placeholder="Choose a username"
-                                value={formData.username}
+                                name="phone"
+                                value={formData.phone}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
+
+                        {/* ADDRESS */}
+                        <div className="form-group">
+                            <label>Address</label>
+                            <input
+                                type="text"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        {/* PASSWORD */}
                         <div className="form-group">
                             <label>Password</label>
                             <input
                                 type="password"
                                 name="password"
-                                placeholder="Create a password"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
+
+                        {/* CONFIRM PASSWORD */}
                         <div className="form-group">
                             <label>Confirm Password</label>
                             <input
                                 type="password"
                                 name="confirmPassword"
-                                placeholder="Repeat your password"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
+
                         <button type="submit" className="register-btn">Register</button>
-                        {error && <p style={{ color: 'red' }}>{error}</p>}
-                        {success && <p style={{ color: 'green' }}>{success}</p>}
+
+                        {error && <p className="error">{error}</p>}
+                        {success && <p className="success">{success}</p>}
                         <div className="signup-link">
                             Already have an account? <a href="/login">Login</a>
                         </div>

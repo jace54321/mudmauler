@@ -99,3 +99,61 @@
     display: none;
   }
 }
+
+.cart-btn, .profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cart-btn svg,
+.profile-btn svg {
+  color: white !important;   /* ← ensures icon is white */
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+/* Profile Dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: 65px; /* below the navbar */
+  right: 10px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  width: 160px;
+  animation: fadeIn 0.15s ease-in-out;
+  z-index: 20;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 12px 15px;
+  background: white;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.dropdown-item:hover {
+  background: #f3f3f3;
+}
+
+.dropdown-item.logout {
+  color: #e63946; /* red */
+  font-weight: 600;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
