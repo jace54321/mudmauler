@@ -5,28 +5,25 @@ import LandingPage from "./pages/Landing-page.jsx";
 import LoginPage from "./pages/Login-page.jsx";
 import RegisterPage from "./pages/Register-page.jsx";
 import DashboardPage from "./pages/Dashboard-page.jsx";
+import ShopPage from "./pages/Shop.jsx";
 
 function App() {
-    // Track login state using sessionId
+    // Tracks signed-in state based on sessionId
     const [isSignedIn, setIsSignedIn] = useState(
         !!localStorage.getItem("sessionId")
     );
 
     return (
         <Routes>
-            {/* Landing */}
             <Route path="/" element={<LandingPage />} />
-
-            {/* Register */}
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Login — pass setIsSignedIn */}
             <Route
                 path="/login"
                 element={<LoginPage setIsSignedIn={setIsSignedIn} />}
             />
 
-            {/* Dashboard — Protected */}
+            {/* Dashboard (Protected Route) */}
             <Route
                 path="/dashboard"
                 element={
@@ -37,6 +34,10 @@ function App() {
                     )
                 }
             />
+
+            {/* ⭐ REQUIRED FOR TIRES LINK */}
+            {/* /shop loads Shop.jsx */}
+            <Route path="/shop" element={<ShopPage />} />
         </Routes>
     );
 }
