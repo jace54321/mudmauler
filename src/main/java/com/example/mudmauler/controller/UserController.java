@@ -20,18 +20,40 @@ public class UserController {
     @Autowired
     private SessionService sessionService;
 
-    // ========================= REGISTER =========================
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody User user) {
         try {
             userService.registerUser(user);
-            return ResponseEntity.ok().body("User registered successfully");
+            return ResponseEntity.ok("User registered successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
-    // ========================= LOGIN =========================
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            User user = userService.login(request.getEmail(), request.getPassword());
+            Session session = sessionService.createSession(user.getId());
+            return ResponseEntity.ok(new LoginResponse("Login successful", session.getSessionId()));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Session-Id") String sessionId) {
+        sessionService.deleteSession(sessionId);
+        return ResponseEntity.ok(new ErrorResponse("Logged out successfully"));
+    }
+
+    // Helper DTOs
+    static class ErrorResponse {
+        private String message;
+        public ErrorResponse(String message) { this.message = message; }
+        public String getMessage() { return message; }
+    }
+
     static class LoginRequest {
         private String email;
         private String password;
@@ -54,30 +76,5 @@ public class UserController {
 
         public String getMessage() { return message; }
         public String getSessionId() { return sessionId; }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        try {
-            User user = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
-            Session session = sessionService.createSession(user.getId());
-            return ResponseEntity.ok().body(new LoginResponse("Login successful!", session.getSessionId()));
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));
-        }
-    }
-
-    // ========================= LOGOUT =========================
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Session-Id") String sessionId) {
-        sessionService.deleteSession(sessionId);
-        return ResponseEntity.ok().body(new ErrorResponse("Logged out successfully!"));
-    }
-
-    // ========================= ERROR WRAPPER =========================
-    static class ErrorResponse {
-        private String message;
-        public ErrorResponse(String message) { this.message = message; }
-        public String getMessage() { return message; }
     }
 }

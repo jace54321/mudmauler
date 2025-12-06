@@ -15,24 +15,28 @@ public class UserService {
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public User registerUser(User user) throws Exception {
-
+        // Check if email exists
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new Exception("Email already in use");
+            throw new Exception("Email is already registered");
         }
 
-        // Hash password
+        // Password hash
         user.setPassword(encoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
 
     public User login(String email, String password) throws Exception {
+        var userOpt = userRepository.findByEmail(email);
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new Exception("No user found with this email"));
+        if (userOpt.isEmpty()) {
+            throw new Exception("No user found with that email");
+        }
+
+        User user = userOpt.get();
 
         if (!encoder.matches(password, user.getPassword())) {
-            throw new Exception("Invalid password");
+            throw new Exception("Incorrect password");
         }
 
         return user;
