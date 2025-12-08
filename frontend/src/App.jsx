@@ -7,44 +7,44 @@ import LoginPage from "./pages/Login-page.jsx";
 import RegisterPage from "./pages/Register-page.jsx";
 import ShopPage from "./pages/Shop.jsx";
 import Carts from "./pages/Carts.jsx";
+import ProfilePage from "./pages/Profile-page.jsx"; // ✅ Added
 
 function App() {
-    // Tracks signed-in state based on sessionId
-    const [isSignedIn, setIsSignedIn] = useState(
-        !!localStorage.getItem("sessionId")
-    );
+  const [isSignedIn, setIsSignedIn] = useState(
+    !!localStorage.getItem("sessionId")
+  );
 
-    const handleLogout = () => {
-        setIsSignedIn(false);
-        localStorage.removeItem("sessionId");
-    };
+  const handleLogout = () => {
+    setIsSignedIn(false);
+    localStorage.removeItem("sessionId");
+  };
 
-    const location = useLocation();
+  const location = useLocation();
+  const hideNavbarOn = ["/login", "/register"];
+  const showNavbar = !hideNavbarOn.includes(location.pathname);
 
-    // hide the global navigation bar on login and register pages
-    const hideNavbarOn = ["/login", "/register"];
-    const showNavbar = !hideNavbarOn.includes(location.pathname);
+  return (
+    <>
+      {showNavbar && (
+        <NavigationBar
+          isSignedIn={isSignedIn}
+          setIsSignedIn={handleLogout}
+        />
+      )}
 
-    return (
-        <>
-            {showNavbar && (
-                <NavigationBar isSignedIn={isSignedIn} setIsSignedIn={handleLogout} />
-            )}
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage setIsSignedIn={setIsSignedIn} />} />
 
-            <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/cart" element={<Carts />} />
 
-                <Route
-                    path="/login"
-                    element={<LoginPage setIsSignedIn={setIsSignedIn} />}
-                />
-                {/* /shop loads Shop.jsx */}
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/cart" element={<Carts />} />
-            </Routes>
-        </>
-    );
+        {/* ✅ NEW PROFILE ROUTE */}
+        <Route path="/profile" element={<ProfilePage />} />
+      </Routes>
+    </>
+  );
 }
 
 export default App;

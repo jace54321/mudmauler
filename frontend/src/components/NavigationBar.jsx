@@ -5,11 +5,10 @@ import "../styles/navigation-bar.css";
 
 const MergedNavbar = ({ isSignedIn, setIsSignedIn, onMenuOpen }) => {
   const navigate = useNavigate();
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -24,7 +23,7 @@ const MergedNavbar = ({ isSignedIn, setIsSignedIn, onMenuOpen }) => {
     <nav className="dashboard-nav">
       <div className="nav-content">
 
-        {/* Mobile Menu Button(Made by James) */} 
+        {/* Mobile menu button */}
         <button className="mobile-menu-btn" onClick={onMenuOpen}>
           <svg width="24" height="24" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -46,9 +45,8 @@ const MergedNavbar = ({ isSignedIn, setIsSignedIn, onMenuOpen }) => {
           <Link to="/shop" className="nav-link">Tires</Link>
         </div>
 
-        {/* Right Icons */}
+        {/* Right side icons */}
         <div className="nav-actions" ref={dropdownRef}>
-
           {isSignedIn && (
             <button className="cart-btn" onClick={() => navigate("/cart")}>
               <FaShoppingCart size={20} color="white" />
@@ -57,32 +55,52 @@ const MergedNavbar = ({ isSignedIn, setIsSignedIn, onMenuOpen }) => {
 
           {isSignedIn ? (
             <>
-              {/* Profile with Dropdown */}
+              {/* Profile icon */}
               <button
                 className="profile-btn"
                 onClick={() => setDropdownOpen((prev) => !prev)}
-                aria-label="Profile"
               >
                 <FaUserCircle size={36} color="white" />
               </button>
 
-              {/* Dropdown */}
+              {/* Dropdown menu */}
               {dropdownOpen && (
                 <div className="profile-dropdown">
-                  <button className="dropdown-item" onClick={() => navigate("/settings")}>
+
+                  {/* FIXED → Go to Profile */}
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      navigate("/profile");
+                      setDropdownOpen(false);
+                    }}
+                  >
                     Settings
                   </button>
 
                   <button
                     className="dropdown-item logout"
                     onClick={() => {
-                      setIsSignedIn();
-                      setDropdownOpen(false);
-                      navigate("/login");
+                        // ❌ DO NOT CLEAR ALL STORAGE
+                        // localStorage.clear();
+
+                        // ✅ ONLY REMOVE SESSION ID (logout)
+                        localStorage.removeItem("sessionId");
+
+                        // Update signed-in state
+                        setIsSignedIn(false);
+
+                        // Close dropdown
+                        setDropdownOpen(false);
+
+                        // Redirect to login
+                        navigate("/login");
                     }}
                   >
                     Logout
                   </button>
+
+
                 </div>
               )}
             </>
@@ -92,7 +110,6 @@ const MergedNavbar = ({ isSignedIn, setIsSignedIn, onMenuOpen }) => {
               <Link to="/register" className="nav-link">Sign Up</Link>
             </>
           )}
-
         </div>
       </div>
     </nav>

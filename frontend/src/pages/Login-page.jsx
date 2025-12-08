@@ -23,32 +23,49 @@ const LoginPage = ({ setIsSignedIn }) => {
                 body: JSON.stringify({ email, password })
             });
 
-            // ALWAYS parse JSON safely
             let data = {};
             try {
                 data = await response.json();
-            } catch (err) {
-                setError("Invalid response from server");
+            } catch {
+                setError("Invalid server response");
                 return;
             }
 
+            // -----------------------------
+            //     LOGIN SUCCESS
+            // -----------------------------
             if (response.ok) {
-                // SUCCESS — backend returned sessionId + message
+                console.log("LOGIN RESPONSE:", data);
+
                 setIsSignedIn(true);
 
-                // store sessionId for protected routes
+                // SAVE SESSION
                 localStorage.setItem("sessionId", data.sessionId);
 
+                // SAVE PROFILE FIELDS
+                localStorage.setItem("userFirst", data.firstName || "");
+                localStorage.setItem("userLast", data.lastName || "");
+                localStorage.setItem("userEmail", data.email || "");
+                localStorage.setItem("userPhone", data.phone || "");
+                localStorage.setItem("userAddress", data.address || "");
+                if (data.avatar !== undefined && data.avatar !== null) {
+                    localStorage.setItem("userAvatar", data.avatar);
+                }
+
                 setSuccess("Login successful!");
-                navigate('/shop');
-            } else {
-                setError(data.message || "Login failed");
+                navigate("/shop");
+                return;
             }
-        } catch (err) {
+
+            // -----------------------------
+            //     LOGIN FAILED
+            // -----------------------------
+            setError(data.message || "Login failed");
+
+        } catch {
             setError("Error connecting to server");
         }
     };
-
 
     return (
         <div className="login-container">
@@ -64,21 +81,32 @@ const LoginPage = ({ setIsSignedIn }) => {
                 <div className="login-card">
                     <h1 className="login-title">LOGIN</h1>
                     <p className="login-desc">Enter your credentials to access your account</p>
+
                     <form className="login-form" onSubmit={handleSubmit}>
                         <label>Email address</label>
-                        <input type="email" placeholder="Enter your email" required value={email} onChange={e => setEmail(e.target.value)} />
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            required
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        />
+
                         <label>Password</label>
-                        <input type="password" placeholder="Enter your password" required value={password} onChange={e => setPassword(e.target.value)} />
-                        <div className="login-options">
-                            <label>
-                                <input type="checkbox" /> Remember me
-                            </label>
-                            <span className="forgot-pwd">Forgot Password?</span>
-                        </div>
+                        <input
+                            type="password"
+                            placeholder="Enter your password"
+                            required
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                        />
+
                         <button type="submit" className="login-btn">Login</button>
+
                         {error && <p style={{ color: 'red' }}>{error}</p>}
                         {success && <p style={{ color: 'green' }}>{success}</p>}
                     </form>
+
                     <div className="signup-link">
                         Don't have an account? <a href="/register">Sign Up</a>
                     </div>
