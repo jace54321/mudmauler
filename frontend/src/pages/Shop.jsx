@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import { products, categories } from "../data/products";
 import ProductCategories from "../components/ProductCategories";
 import ProductGrid from "../components/ProductGrid";
+import { Alert, Button } from '@mui/material';
 import "../styles/shop.css";
 
 export default function Shop() {
     const [activeCategory, setCategory] = useState("all");
     const [cart, setCart] = useState([]);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
 
     const filteredProducts =
         activeCategory === "all"
@@ -27,11 +30,28 @@ export default function Shop() {
                 return [...prevCart, { ...product, quantity: 1 }];
             }
         });
-        // optionally: alert("Added to cart!");
+        setAlertMessage(`${product.name} added to cart!`);
+        setShowAlert(true);
+        // Auto-close alert after 4 seconds
+        setTimeout(() => setShowAlert(false), 4000);
     };
 
     return (
         <div className="main-layout">
+            {showAlert && (
+                <Alert
+                    severity="success"
+                    onClose={() => setShowAlert(false)}
+                    action={
+                        <Button color="inherit" size="small" onClick={() => setShowAlert(false)}>
+                            CLOSE
+                        </Button>
+                    }
+                    style={{ position: 'fixed', top: 20, right: 20, zIndex: 1000 }}
+                >
+                    {alertMessage}
+                </Alert>
+            )}
             <ProductCategories
                 categories={categories}
                 activeCategory={activeCategory}
