@@ -85,30 +85,6 @@ const LandingPage = () => {
 
   return (
     <div className="landing-container">
-      <nav className="main-navbar">
-        <h2 className="navbar-logo">MUDMAULER</h2>
-        <div className="navbar-right">
-          <Link to="/" className="navbar-link">Home</Link>
-          <Link to="/about" className="navbar-link">About</Link>
-          <Link to="/tires" className="navbar-link">Tires</Link>
-          <Link to="/login" className="navbar-link">Login</Link>
-          <Link to="/register" className="navbar-btn">Sign Up</Link>
-        </div>
-        <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
-          <div></div><div></div><div></div>
-        </div>
-      </nav>
-
-      {menuOpen && (
-        <div className="mobile-menu">
-          <Link to="/" className="mobile-link" onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/about" className="mobile-link" onClick={() => setMenuOpen(false)}>About</Link>
-          <Link to="/tires" className="mobile-link" onClick={() => setMenuOpen(false)}>Tires</Link>
-          <Link to="/login" className="mobile-link" onClick={() => setMenuOpen(false)}>Login</Link>
-          <Link to="/register" className="mobile-btn" onClick={() => setMenuOpen(false)}>Sign Up</Link>
-        </div>
-      )}
-
       <section className="hero">
         {/* carousel slides (background images) */}
         <div className="hero-slider" aria-hidden="true">

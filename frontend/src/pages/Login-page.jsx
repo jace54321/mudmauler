@@ -40,7 +40,7 @@ const LoginPage = ({ setIsSignedIn }) => {
                 localStorage.setItem("sessionId", data.sessionId);
 
                 setSuccess("Login successful!");
-                navigate('/dashboard');
+                navigate('/shop');
             } else {
                 setError(data.message || "Login failed");
             }

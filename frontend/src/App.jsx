@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
+import NavigationBar from "./components/NavigationBar.jsx";
 import LandingPage from "./pages/Landing-page.jsx";
 import LoginPage from "./pages/Login-page.jsx";
 import RegisterPage from "./pages/Register-page.jsx";
-import DashboardPage from "./pages/Dashboard-page.jsx";
 import ShopPage from "./pages/Shop.jsx";
+import Carts from "./pages/Carts.jsx";
 
 function App() {
     // Tracks signed-in state based on sessionId
@@ -13,32 +14,36 @@ function App() {
         !!localStorage.getItem("sessionId")
     );
 
+    const handleLogout = () => {
+        setIsSignedIn(false);
+        localStorage.removeItem("sessionId");
+    };
+
+    const location = useLocation();
+
+    // hide the global navigation bar on login and register pages
+    const hideNavbarOn = ["/login", "/register"];
+    const showNavbar = !hideNavbarOn.includes(location.pathname);
+
     return (
-        <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+        <>
+            {showNavbar && (
+                <NavigationBar isSignedIn={isSignedIn} setIsSignedIn={handleLogout} />
+            )}
 
-            <Route
-                path="/login"
-                element={<LoginPage setIsSignedIn={setIsSignedIn} />}
-            />
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/register" element={<RegisterPage />} />
 
-            {/* Dashboard (Protected Route) */}
-            <Route
-                path="/dashboard"
-                element={
-                    isSignedIn ? (
-                        <DashboardPage />
-                    ) : (
-                        <LoginPage setIsSignedIn={setIsSignedIn} />
-                    )
-                }
-            />
-
-            {/* ⭐ REQUIRED FOR TIRES LINK */}
-            {/* /shop loads Shop.jsx */}
-            <Route path="/shop" element={<ShopPage />} />
-        </Routes>
+                <Route
+                    path="/login"
+                    element={<LoginPage setIsSignedIn={setIsSignedIn} />}
+                />
+                {/* /shop loads Shop.jsx */}
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/cart" element={<Carts />} />
+            </Routes>
+        </>
     );
 }
 
