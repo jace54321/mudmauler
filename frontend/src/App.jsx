@@ -7,44 +7,58 @@ import LoginPage from "./pages/Login-page.jsx";
 import RegisterPage from "./pages/Register-page.jsx";
 import ShopPage from "./pages/Shop.jsx";
 import Carts from "./pages/Carts.jsx";
-import ProfilePage from "./pages/Profile-page.jsx"; // ✅ Added
+import CheckoutPage from "./pages/Checkout-page.jsx";
+import ProfilePage from "./pages/Profile-page.jsx";
+import AboutPage from "./pages/About-page.jsx";
 
 function App() {
-  const [isSignedIn, setIsSignedIn] = useState(
-    !!localStorage.getItem("sessionId")
-  );
+    // Tracks signed-in state based on sessionId
+    const [isSignedIn, setIsSignedIn] = useState(
+        !!localStorage.getItem("sessionId")
+    );
 
-  const handleLogout = () => {
-    setIsSignedIn(false);
-    localStorage.removeItem("sessionId");
-  };
+    const handleLogout = () => {
+        setIsSignedIn(false);
+        localStorage.removeItem("sessionId");
+    };
 
-  const location = useLocation();
-  const hideNavbarOn = ["/login", "/register"];
-  const showNavbar = !hideNavbarOn.includes(location.pathname);
+    const location = useLocation();
 
-  return (
-    <>
-      {showNavbar && (
-        <NavigationBar
-          isSignedIn={isSignedIn}
-          setIsSignedIn={handleLogout}
-        />
-      )}
+    // hide the global navigation bar on login and register pages
+    const hideNavbarOn = ["/login", "/register"];
+    const showNavbar = !hideNavbarOn.includes(location.pathname);
 
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage setIsSignedIn={setIsSignedIn} />} />
+    return (
+        <>
+            {showNavbar && (
+                <NavigationBar
+                    isSignedIn={isSignedIn}
+                    setIsSignedIn={handleLogout}
+                />
+            )}
 
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/cart" element={<Carts />} />
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route
+                    path="/login"
+                    element={<LoginPage setIsSignedIn={setIsSignedIn} />}
+                />
 
-        {/* ✅ NEW PROFILE ROUTE */}
-        <Route path="/profile" element={<ProfilePage />} />
-      </Routes>
-    </>
-  );
+                {/* Shop Page */}
+                <Route path="/shop" element={<ShopPage />} />
+
+                {/* Cart Page */}
+                <Route path="/cart" element={<Carts />} />
+
+                {/* ✅ Checkout Page (You were missing this!) */}
+                <Route path="/about" element={<AboutPage />} />
+                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+
+            </Routes>
+        </>
+    );
 }
 
 export default App;

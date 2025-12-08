@@ -20,6 +20,9 @@ public class UserController {
     @Autowired
     private SessionService sessionService;
 
+    // -------------------------
+    // REGISTER
+    // -------------------------
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
@@ -30,27 +33,50 @@ public class UserController {
         }
     }
 
+    // -------------------------
+    // LOGIN — RETURN FULL USER INFO
+    // -------------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             User user = userService.login(request.getEmail(), request.getPassword());
             Session session = sessionService.createSession(user.getId());
-            return ResponseEntity.ok(new LoginResponse("Login successful", session.getSessionId()));
+
+            // Return full profile to frontend
+            LoginResponse response = new LoginResponse(
+                    "Login successful",
+                    session.getSessionId(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getPhone(),
+                    user.getAddress(),
+                    ""   // avatar placeholder
+            );
+
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));
         }
     }
 
+    // -------------------------
+    // LOGOUT
+    // -------------------------
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Session-Id") String sessionId) {
         sessionService.deleteSession(sessionId);
         return ResponseEntity.ok(new ErrorResponse("Logged out successfully"));
     }
 
-    // Helper DTOs
+    // ----------------------------------------------------
+    // DTO CLASSES
+    // ----------------------------------------------------
+
     static class ErrorResponse {
         private String message;
-        public ErrorResponse(String message) { this.message = message; }
+        public ErrorResponse(String msg) { this.message = msg; }
         public String getMessage() { return message; }
     }
 
@@ -69,12 +95,41 @@ public class UserController {
         private String message;
         private String sessionId;
 
-        public LoginResponse(String message, String sessionId) {
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String phone;
+        private String address;
+        private String avatar;
+
+        public LoginResponse(
+                String message,
+                String sessionId,
+                String firstName,
+                String lastName,
+                String email,
+                String phone,
+                String address,
+                String avatar
+        ) {
             this.message = message;
             this.sessionId = sessionId;
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.email = email;
+            this.phone = phone;
+            this.address = address;
+            this.avatar = avatar;
         }
 
         public String getMessage() { return message; }
         public String getSessionId() { return sessionId; }
+        public String getFirstName() { return firstName; }
+        public String getLastName() { return lastName; }
+        public String getEmail() { return email; }
+        public String getPhone() { return phone; }
+        public String getAddress() { return address; }
+        public String getAvatar() { return avatar; }
     }
+
 }

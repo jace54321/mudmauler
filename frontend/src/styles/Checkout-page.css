@@ -1,0 +1,26 @@
+.checkout-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  background: #f7f7f7;
+}
+
+.checkout-box {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 420px;
+}
+
+.checkout-box h1 {
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.checkout-box p {
+  color: #555;
+  font-size: 18px;
+}
