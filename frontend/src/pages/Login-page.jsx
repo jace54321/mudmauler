@@ -48,18 +48,12 @@ const LoginPage = ({ setIsSignedIn }) => {
                 localStorage.setItem("userEmail", data.email || "");
                 localStorage.setItem("userPhone", data.phone || "");
                 localStorage.setItem("userAddress", data.address || "");
-                if (data.avatar !== undefined && data.avatar !== null) {
-                    localStorage.setItem("userAvatar", data.avatar);
-                }
 
                 setSuccess("Login successful!");
                 navigate("/shop");
                 return;
             }
 
-            // -----------------------------
-            //     LOGIN FAILED
-            // -----------------------------
             setError(data.message || "Login failed");
 
         } catch {

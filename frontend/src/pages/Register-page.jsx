@@ -54,7 +54,6 @@
                     localStorage.setItem("userEmail", formData.email);
                     localStorage.setItem("userPhone", formData.phone);
                     localStorage.setItem("userAddress", formData.address);
-                    localStorage.setItem("userAvatar", "");
                     localStorage.setItem("sessionId", "active");
 
                     setSuccess("Registration successful! Redirecting...");

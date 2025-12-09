@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Added for navigation
+import { useNavigate } from "react-router-dom";
 import { products, categories } from "../data/products";
 import ProductCategories from "../components/ProductCategories";
 import ProductGrid from "../components/ProductGrid";
+import ProductModal from "../components/ProductModal"; // <-- NEW: Import the modal
 import "../styles/shop.css";
 
 export default function Shop() {
-    const navigate = useNavigate(); // Hook to change pages
+    const navigate = useNavigate();
     const [activeCategory, setCategory] = useState("all");
     const [toast, setToast] = useState({ show: false, message: "" });
+
+    // <-- NEW STATE: Tracks the product to display in the modal
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const filteredProducts =
         activeCategory === "all"
@@ -38,6 +42,21 @@ export default function Shop() {
 
         setToast({ show: true, message: `${product.name} added to cart!` });
         setTimeout(() => setToast({ show: false, message: "" }), 2000);
+
+        // Close modal if the addition came from within the modal
+        if (selectedProduct && selectedProduct.id === product.id) {
+            handleCloseModal();
+        }
+    };
+
+    // <-- NEW HANDLER: Opens the modal
+    const handleCardClick = (product) => {
+        setSelectedProduct(product);
+    };
+
+    // <-- NEW HANDLER: Closes the modal
+    const handleCloseModal = () => {
+        setSelectedProduct(null);
     };
 
     return (
@@ -74,7 +93,6 @@ export default function Shop() {
                         <p style={{ margin: 0 }}>Check out the latest products</p>
                     </div>
 
-                    {/* NEW: Button to view the cart */}
                     <button
                         style={{
                             padding: "10px 20px",
@@ -95,8 +113,16 @@ export default function Shop() {
                 <ProductGrid
                     products={filteredProducts}
                     addToCart={handleAddToCart}
+                    // <-- NEW PROP: Pass the card click handler down
+                    onProductClick={handleCardClick}
                 />
             </div>
+            {/* <-- NEW COMPONENT: The product detail modal */}
+            <ProductModal
+                product={selectedProduct}
+                onClose={handleCloseModal}
+                onAddToCart={handleAddToCart}
+            />
         </div>
     );
 }

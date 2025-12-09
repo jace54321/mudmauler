@@ -1,6 +1,7 @@
-import React from "react";
+// src/components/ProductCard.jsx (CORRECTED)
 
-function ProductCard({ product, addToCart, saveForLater }) {
+// 1. Accept the new prop: onAddToCartClick
+function ProductCard({ product, onAddToCartClick, saveForLater }) {
   return (
     <div className="product-card">
       <img src={product.image} alt={product.name} />
@@ -14,7 +15,8 @@ function ProductCard({ product, addToCart, saveForLater }) {
         })}
       </div>
       <div className="buttons">
-        <button onClick={() => addToCart(product)}>Add to Cart</button>
+        {/* 2. Use the new prop directly in the button's onClick */}
+        <button onClick={onAddToCartClick}>Add to Cart</button>
       </div>
     </div>
   );

@@ -1,26 +1,231 @@
-.checkout-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-  background: #f7f7f7;
+/* src/styles/checkout-page.css (PROFESSIONAL BALANCE UPDATE) */
+
+.checkout-page-container {
+    max-width: 1200px;
+    margin: 60px auto; /* Increased vertical margin */
+    padding: 0 20px; /* Horizontal padding */
 }
 
-.checkout-box {
-  background: #ffffff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  max-width: 420px;
+/* --- New Main Card Container --- */
+.checkout-main-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Subtle border */
+    border-radius: 8px; /* Slightly reduced rounding */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Stronger but clean shadow */
+    overflow: hidden;
 }
 
-.checkout-box h1 {
-  color: #222;
-  margin-bottom: 12px;
+.checkout-content {
+    display: flex;
+    min-height: 500px;
 }
 
-.checkout-box p {
-  color: #555;
-  font-size: 18px;
+/* --- Left Column (Payment & Shipping) --- */
+.checkout-left-column {
+    flex: 2;
+    padding: 40px 50px; /* Increased horizontal padding for balance */
+    border-right: 1px solid #f0f0f0;
+}
+
+/* Section Title Styling */
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd; /* Light separator line */
+}
+
+/* --- PAYMENT METHOD SECTION DESIGN --- */
+.checkout-section {
+    margin-bottom: 40px; /* Consistent spacing between sections */
+}
+
+.payment-options {
+    display: flex;
+    gap: 25px; /* Increased gap */
+    flex-wrap: wrap;
+    padding: 10px 0;
+}
+
+.payment-card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px 15px;
+    width: 140px;
+    height: 70px; /* Reduced height for better card shape */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #f7f7f7;
+    transition: all 0.2s;
+}
+
+.payment-card:hover {
+    border-color: #c00;
+}
+
+.payment-card.selected {
+    border: 3px solid #c00;
+    background-color: #fff8f8;
+}
+
+.payment-logo-placeholder {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    width: 100%;
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 5px;
+}
+
+
+
+.payment-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}
+
+/* --- SHIPPING ADDRESS SECTION DESIGN --- */
+.address-details-box {
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 6px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.address-text {
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 70%;
+}
+
+.change-address-btn {
+    padding: 8px 20px;
+    background-color: #555;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.change-address-btn:hover {
+    background-color: #c00; /* Use brand color for hover */
+}
+
+
+/* --- Right Column (Order Summary) --- */
+.checkout-right-column {
+    flex: 1;
+    background-color: #fcfcfc; /* Very light background for contrast */
+    padding: 40px 30px;
+}
+
+.summary-header {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 700;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+}
+
+.summary-details {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.summary-tax {
+    font-weight: 600;
+    color: #333;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.summary-total span:last-child {
+    color: #c00;
+    font-size: 1.5rem;
+}
+
+.checkout-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.place-order-btn {
+    padding: 14px;
+    background-color: #c00;
+    color: white;
+    font-weight: 700;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+.place-order-btn:hover {
+    background-color: #a00;
+}
+
+.cancel-btn {
+    padding: 14px;
+    background-color: transparent;
+    color: #666;
+    border: 1px solid #ddd;
+    font-weight: 500;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    width: 100%;
+}
+
+/* --- Media Query for Responsiveness --- */
+@media (max-width: 900px) {
+    .checkout-content {
+        flex-direction: column;
+    }
+    .checkout-left-column {
+        padding: 30px;
+        border-right: none;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .checkout-right-column {
+        padding: 30px;
+    }
+    .address-details-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .address-text {
+        max-width: 100%;
+    }
 }
