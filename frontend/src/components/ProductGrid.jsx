@@ -1,34 +1,35 @@
-// src/components/ProductGrid.jsx (CORRECTED)
 import React from "react";
 import ProductCard from "./ProductCard";
 
-// Accept the new prop: onProductClick
-function ProductGrid({ products, addToCart, saveForLater, onProductClick }) {
+// Receives 'onProductClick' to handle opening the modal
+function ProductGrid({ products, addToCart, onProductClick }) {
   return (
-    <section className="product-grid">
-      {products.map(product => (
-        // 1. Wrapper handles opening the modal
+    <div className="product-grid">
+      {products.map((product) => (
+        // 1. Wrapper: Handles the click for the Modal
         <div
           key={product.id}
           className="product-grid-item-wrapper"
           onClick={() => onProductClick(product)}
+          style={{ cursor: "pointer" }} // Visual cue that card is clickable
         >
           <ProductCard
             product={product}
-            // --- REMOVED: addToCart={addToCart} ---
-            saveForLater={saveForLater}
 
-            // 2. Pass the handler that includes e.stopPropagation()
-            onAddToCartClick={(e) => {
-                // This line is essential to prevent the click from bubbling up
-                // and triggering the parent <div>'s onClick (which opens the modal).
+            // 2. Intercept the Add to Cart click
+            addToCart={(e) => {
+              // Vital: Stop the click from bubbling up to the wrapper
+              // This prevents the Modal from opening when you just want to add to cart
+              if (e && e.stopPropagation) {
                 e.stopPropagation();
-                addToCart(product);
+              }
+              addToCart(product);
             }}
           />
         </div>
       ))}
-    </section>
+    </div>
   );
 }
+
 export default ProductGrid;

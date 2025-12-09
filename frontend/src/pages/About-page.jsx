@@ -1,15 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { ShoppingCart, User, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react"; // Removed unused imports
 import "../styles/About-page.css";
 import heroBanner from "../assets/magic.png";
 import tireProduct from "../assets/tire-product.png";
+import Footer from "../components/Footer"; // Import the shared Footer component
 
 const AboutPage = () => {
   return (
     <div className="about-page">
-      {/* Header section removed */}
-
       {/* Hero Banner */}
       <section className="hero-banner">
         <img src={heroBanner} alt="Off-road vehicles" className="hero-image" />
@@ -114,53 +112,8 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <Link to="/" className="logo">
-                <span className="logo-text">MUDMAULER</span>
-                <span className="logo-tagline">PERFORMANCE TIRES</span>
-              </Link>
-              <p className="footer-tagline">Conquering every terrain since 2010.</p>
-            </div>
-
-            <div className="footer-links">
-              <h4 className="footer-heading">Quick Links</h4>
-              <ul>
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/tires">Our Tires</Link></li>
-              </ul>
-            </div>
-
-            <div className="footer-links">
-              <h4 className="footer-heading">Products</h4>
-              <ul>
-                <li>Mud Terrain Tires</li>
-                <li>All-Terrain Tires</li>
-                <li>Highway Tires</li>
-                <li>Commercial Tires</li>
-              </ul>
-            </div>
-
-            <div className="footer-links">
-              <h4 className="footer-heading">Contact</h4>
-              <ul>
-                <li>info@mudmauler.com</li>
-                <li>+1 (555) 123-4567</li>
-                <li>1234 Off-Road Drive</li>
-                <li>Adventure City, AC 12345</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="footer-bottom">
-            <p>© 2024 Mudmauler Performance Tires. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Replaced old Footer with the Component */}
+      <Footer />
     </div>
   );
 };

@@ -1,24 +1,47 @@
-// src/components/ProductCard.jsx (CORRECTED)
+import React from "react";
 
-// 1. Accept the new prop: onAddToCartClick
-function ProductCard({ product, onAddToCartClick, saveForLater }) {
+function ProductCard({ product, addToCart, onProductClick }) {
+  // Helper for price formatting
+  const formattedPrice = product.price.toLocaleString("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: 2
+  });
+
   return (
-    <div className="product-card">
-      <img src={product.image} alt={product.name} />
-      <h3>{product.name}</h3>
-      <div className="desc">{product.description}</div>
-      <div className="price">
-        {product.price.toLocaleString("en-PH", {
-          style: "currency",
-          currency: "PHP",
-          minimumFractionDigits: 2
-        })}
+    <article className="product-card">
+      {/* Clickable Area for Modal */}
+      <div
+        className="product-clickable-area"
+        onClick={() => onProductClick && onProductClick(product)}
+        style={{ cursor: "pointer" }}
+      >
+        <div className="product-image-wrapper">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="product-image"
+          />
+        </div>
+
+        <h3 className="product-name">{product.name}</h3>
+        <p className="product-desc">{product.description}</p>
+        <div className="product-price">{formattedPrice}</div>
       </div>
-      <div className="buttons">
-        {/* 2. Use the new prop directly in the button's onClick */}
-        <button onClick={onAddToCartClick}>Add to Cart</button>
+
+      <div className="product-buttons">
+        <button
+          className="read-more-button"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevents the modal from opening
+            addToCart(product);
+          }}
+        >
+          Add to Cart
+        </button>
       </div>
-    </div>
+    </article>
   );
 }
+
 export default ProductCard;
