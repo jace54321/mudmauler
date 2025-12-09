@@ -21,7 +21,7 @@
     width: 100%;
     height: 100%;
     background: rgba(20,20,20,0.55);
-    pointer-events: none;      /* ← THIS FIXES YOUR CLICK ISSUE */
+    pointer-events: none;      /* Ensures clicks pass through to form if needed */
     z-index: 1;
 }
 
@@ -68,13 +68,13 @@
     top: 50%;
     right: 6%;
     transform: translateY(-50%);
-    z-index: 10 !important; /* ← ensures form is above overlay */
+    z-index: 10 !important; /* Ensures form is above overlay */
 }
 
 .register-card {
     width: 440px;
     background: white;
-    padding:38px;
+    padding: 38px;
     border-radius: 22px;
     box-shadow: 0 3px 20px rgba(0,0,0,0.15);
 }
@@ -111,6 +111,8 @@
 }
 
 .form-group input {
+    width: 100%;             /* FIX: Ensures input fills container */
+    box-sizing: border-box;  /* FIX: Ensures padding doesn't push width over 100% */
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #bbb;
@@ -125,7 +127,7 @@
 }
 
 .half {
-    width: 100%;
+    flex: 1; /* FIX: Tells the two inputs to share the space equally */
 }
 
 /* ============================================================
