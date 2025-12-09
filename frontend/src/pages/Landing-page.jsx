@@ -1,10 +1,11 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "../styles/landing-page.css";
-import heroBg from "../assets/hero-bg.jpg"; // optional fallback if you want
+
+// Images
 import e1 from "../assets/e1.png";
 import e2 from "../assets/e2.png";
 import e3 from "../assets/e3.png";
-import { Link } from "react-router-dom";
 
 const DraggableCard = ({ image, title, description, index }) => {
   const cardRef = useRef(null);
@@ -61,7 +62,6 @@ const DraggableCard = ({ image, title, description, index }) => {
 };
 
 const LandingPage = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const slides = [e1, e2, e3]; // hero carousel images
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -108,7 +108,7 @@ const LandingPage = () => {
           <h2>DOMINATE THE DIRT</h2>
           <p>Premium off-road tires engineered for extreme terrain. When the path ends, your adventure begins.</p>
           <div className="hero-cta">
-            <a href="/shop" className="shop-btn">Shop Tires</a>
+            <Link to="/shop" className="shop-btn">Shop Tires</Link>
             <a href="#features" className="learn-btn">Learn More</a>
           </div>
           <div className="hero-carousel">
@@ -134,8 +134,54 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <footer className="footer">
-        <p>© {new Date().getFullYear()} MUDMAULER. ALL RIGHTS RESERVED.</p>
+      {/* NEW FOOTER SECTION */}
+      <footer className="footer-container">
+        <div className="footer-content">
+          {/* Column 1: Brand */}
+          <div className="footer-col brand-col">
+            <div className="footer-logo">
+              <h2>MUDMAULER</h2>
+              <span>PERFORMANCE TIRES</span>
+            </div>
+            <p className="brand-tagline">Conquering every terrain since 2010.</p>
+          </div>
+
+          {/* Column 2: Quick Links */}
+          <div className="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/shop">Our Tires</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Products */}
+          <div className="footer-col">
+            <h4>Products</h4>
+            <ul>
+              <li><Link to="/shop">Mud Terrain Tires</Link></li>
+              <li><Link to="/shop">All-Terrain Tires</Link></li>
+              <li><Link to="/shop">Highway Tires</Link></li>
+              <li><Link to="/shop">Commercial Tires</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Contact */}
+          <div className="footer-col contact-col">
+            <h4>Contact</h4>
+            <ul>
+              <li>info@mudmauler.com</li>
+              <li>+1 (555) 123-4567</li>
+              <li>1234 Off-Road Drive</li>
+              <li>Adventure City, AC 12345</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} Mudmauler Performance Tires. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
