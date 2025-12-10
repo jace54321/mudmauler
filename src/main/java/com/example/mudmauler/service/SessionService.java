@@ -31,4 +31,12 @@ public class SessionService {
     public void deleteSession(String sessionId) {
         sessionRepository.deleteBySessionId(sessionId);
     }
+
+    public Long getUserIdBySessionId(String sessionId) {
+        Session session = sessionRepository.findBySessionId(sessionId);
+        if (session != null && session.getExpiresAt().isAfter(LocalDateTime.now())) {
+            return session.getUserId();
+        }
+        return null;
+    }
 }

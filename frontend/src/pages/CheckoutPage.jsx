@@ -1,7 +1,7 @@
-// src/pages/CheckoutPage.jsx (FIXED for Cart Reflection)
+// src/pages/CheckoutPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/Checkout-page.css"; // Ensure this uses your latest professional CSS
+import "../styles/Checkout-page.css";
 
 // --- Payment Method Data ---
 const paymentMethods = [
@@ -10,7 +10,7 @@ const paymentMethods = [
     { id: 'gcash', name: 'GCash', logo: 'G' },
 ];
 
-// Helper to format currency (Moved out of component for cleanliness)
+// Helper to format currency
 const formatPHP = (amount) =>
     amount.toLocaleString("en-PH", {
         style: "currency",
@@ -20,24 +20,20 @@ const formatPHP = (amount) =>
 
 // --- Data Fetching and Calculation Functions ---
 
-// 1. Function to fetch cart items from localStorage
 const getCartItems = () => {
     const stored = localStorage.getItem("cart");
     return stored ? JSON.parse(stored) : [];
 };
 
-// 2. Function to calculate totals (matches Carts.jsx logic exactly)
 const calculateCartTotals = (cartItems) => {
-    const SHIPPING_FEE = 0.00; // MUST match Carts.jsx implied shipping
-    const TAX_RATE = 0.08;    // MUST match Carts.jsx (0.08)
+    const SHIPPING_FEE = 0.00;
+    const TAX_RATE = 0.08;
 
     const subtotal = cartItems.reduce((acc, item) =>
         acc + (item.price * item.quantity), 0
     );
 
-    // Note: We don't use .toFixed(2) here for the intermediate calculation to keep it numeric
     const taxAmount = subtotal * TAX_RATE;
-
     const total = subtotal + SHIPPING_FEE + taxAmount;
 
     return {
@@ -49,7 +45,6 @@ const calculateCartTotals = (cartItems) => {
     };
 };
 
-// Function to get the user's default shipping address (Mock, remains the same)
 const getMockShippingAddress = () => {
     return {
         name: "Joseph",
@@ -67,23 +62,64 @@ export default function CheckoutPage() {
     const [shippingAddress] = useState(getMockShippingAddress());
     const [selectedPayment, setSelectedPayment] = useState("visa");
 
-    // Optional: Recalculate if the cart *might* change while on this page
+    // Recalculate if the cart might change while on this page
     useEffect(() => {
-        // This ensures the totals are fresh when the page loads
         setTotals(calculateCartTotals(getCartItems()));
     }, []);
 
-    const handlePlaceOrder = () => {
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+    const handlePlaceOrder = async () => {
         if (totals.total === 0) {
             alert("Cannot place an empty order!");
             return;
         }
-        // Ideally, here you'd call a payment API, clear the cart in localStorage, and navigate.
-        alert(`Order Total: ${formatPHP(totals.total)} placed successfully!`);
 
-        // Mock success steps:
-        localStorage.removeItem("cart");
-        navigate("/order-confirmation");
+        const sessionId = localStorage.getItem("sessionId");
+        if (!sessionId) {
+            alert("Please log in to place an order");
+            navigate("/login");
+            return;
+        }
+
+        setIsPlacingOrder(true);
+
+        try {
+            const cartItems = getCartItems();
+            const orderItems = cartItems.map(item => ({
+                productId: item.id,
+                quantity: item.quantity
+            }));
+
+            const response = await fetch('http://localhost:8080/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Session-Id': sessionId
+                },
+                body: JSON.stringify({ items: orderItems })
+            });
+
+            if (response.ok) {
+                // FIXED: Removed "const data =" to fix unused variable warning
+                await response.json();
+
+                // 1. Clear the cart from local storage
+                localStorage.removeItem("cart");
+
+                // 2. Navigate to the new Success Page
+                navigate("/purchased");
+
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to place order: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error("Error placing order:", error);
+            alert("Error connecting to server. Please try again.");
+        } finally {
+            setIsPlacingOrder(false);
+        }
     };
 
     return (
@@ -149,7 +185,6 @@ export default function CheckoutPage() {
 
                             <div className="summary-total">
                                 <span>TOTAL</span>
-                                {/* Rounding the final total for display, matching Carts.jsx behavior */}
                                 <span>{formatPHP(totals.total)}</span>
                             </div>
 
@@ -157,9 +192,9 @@ export default function CheckoutPage() {
                                 <button
                                     className="place-order-btn"
                                     onClick={handlePlaceOrder}
-                                    disabled={totals.total === 0}
+                                    disabled={totals.total === 0 || isPlacingOrder}
                                 >
-                                    Place Order
+                                    {isPlacingOrder ? "Placing Order..." : "Place Order"}
                                 </button>
                                 <button
                                     className="cancel-btn"

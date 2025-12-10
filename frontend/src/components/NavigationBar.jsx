@@ -78,6 +78,19 @@ const MergedNavbar = ({ isSignedIn, setIsSignedIn, onMenuOpen }) => {
                     Settings
                   </button>
 
+                  {/* Admin Dashboard Link */}
+                  {localStorage.getItem("userRole") === "ADMIN" && (
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        navigate("/admin");
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      Admin Dashboard
+                    </button>
+                  )}
+
                   <button
                     className="dropdown-item logout"
                     onClick={() => {

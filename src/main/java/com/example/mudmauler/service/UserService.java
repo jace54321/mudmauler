@@ -2,6 +2,7 @@ package com.example.mudmauler.service;
 
 import com.example.mudmauler.entity.User;
 import com.example.mudmauler.repository.UserRepository;
+import com.example.mudmauler.dto.UpdateProfileRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,5 +41,37 @@ public class UserService {
         }
 
         return user;
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    public User updateUserProfile(Long id, UpdateProfileRequest request) throws Exception {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new Exception("User not found"));
+
+        // Check if email is being changed and if it's already taken
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new Exception("Email is already registered");
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
+
+        return userRepository.save(user);
     }
 }

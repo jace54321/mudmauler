@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // Removed useNavigate since we are no longer redirecting
-import { products, categories } from "../data/products";
+import { categories } from "../data/products";
 import ProductGrid from "../components/ProductGrid";
 import Footer from "../components/Footer";
 import ProductModal from "../components/ProductModal";
@@ -22,11 +22,49 @@ const Icons = {
 
 // Receive the isSignedIn prop from App.js
 export default function Shop({ isSignedIn }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSection, setExpandedSection] = useState(true);
   const [toast, setToast] = useState({ show: false, message: "" });
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          // Map backend products to frontend format
+          const mappedProducts = data.map(product => ({
+            id: product.productId,
+            name: product.name,
+            price: product.price,
+            category: product.category || 'all-terrain',
+            image: product.imageUrl || '/default-tire.jpg',
+            description: product.description || ''
+          }));
+          setProducts(mappedProducts);
+        } else {
+          // Fallback to local data if backend fails
+          const { products: localProducts } = await import("../data/products");
+          setProducts(localProducts);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        // Fallback to local data
+        import("../data/products").then(({ products: localProducts }) => {
+          setProducts(localProducts);
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Cart Logic
   const getCart = () => {
@@ -162,20 +200,28 @@ export default function Shop({ isSignedIn }) {
 
           <div className="results-bar">
             <span className="results-count">
-              Showing 1-{filteredProducts.length} of {filteredProducts.length} results
+              {loading ? "Loading..." : `Showing 1-${filteredProducts.length} of ${filteredProducts.length} results`}
             </span>
           </div>
 
-          <ProductGrid
-            products={filteredProducts}
-            addToCart={handleAddToCart}
-            onProductClick={handleCardClick}
-          />
-
-          {filteredProducts.length === 0 && (
+          {loading ? (
             <div className="no-results">
-              <p>No products found matching your criteria.</p>
+              <p>Loading products...</p>
             </div>
+          ) : (
+            <>
+              <ProductGrid
+                products={filteredProducts}
+                addToCart={handleAddToCart}
+                onProductClick={handleCardClick}
+              />
+
+              {filteredProducts.length === 0 && (
+                <div className="no-results">
+                  <p>No products found matching your criteria.</p>
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>

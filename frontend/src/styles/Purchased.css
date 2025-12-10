@@ -1,0 +1,85 @@
+/* src/styles/Purchased.css */
+
+.purchased-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* Dark background to match the main site */
+  background-color: #121212;
+  width: 100%;
+}
+
+.success-card {
+  text-align: center;
+  /* Darker card background */
+  background: #1E1E1E;
+  padding: 50px 40px;
+  border-radius: 4px; /* Sharper corners for a rugged look */
+  /* Subtle dark shadow and a thin dark border */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  max-width: 450px;
+  width: 90%;
+}
+
+.checkmark-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  /* Dark red background with a bright red border */
+  background-color: rgba(229, 57, 53, 0.1);
+  border: 3px solid #E53935;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px auto;
+}
+
+.success-icon {
+  /* MUDMAULER Red */
+  color: #E53935;
+  font-size: 45px;
+  font-weight: 900;
+}
+
+h1 {
+  /* White text, uppercase, bold */
+  color: #FFFFFF;
+  margin-bottom: 15px;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+}
+
+p {
+  /* Light gray text for better readability on dark background */
+  color: #B0BEC5;
+  margin-bottom: 40px;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.btn-shop {
+  display: inline-block;
+  /* MUDMAULER Red background */
+  background-color: #E53935;
+  color: white;
+  padding: 15px 35px;
+  text-decoration: none;
+  border-radius: 2px; /* Sharp corners */
+  transition: all 0.3s ease;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-shop:hover {
+  /* Darker red on hover */
+  background-color: #C62828;
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+  transform: translateY(-2px);
+}

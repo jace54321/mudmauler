@@ -10,6 +10,8 @@ import Carts from "./pages/Carts.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import ProfilePage from "./pages/Profile-page.jsx";
 import AboutPage from "./pages/About-page.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import Purchased from "./pages/Purchased.jsx";
 
 function App() {
     // Tracks signed-in state based on sessionId
@@ -24,8 +26,8 @@ function App() {
 
     const location = useLocation();
 
-    // hide the global navigation bar on login and register pages
-    const hideNavbarOn = ["/login", "/register"];
+    // hide the global navigation bar on login, register, and admin pages
+    const hideNavbarOn = ["/login", "/register", "/admin"];
     const showNavbar = !hideNavbarOn.includes(location.pathname);
 
     return (
@@ -46,9 +48,9 @@ function App() {
                 />
 
                 {/* FIX: Pass the isSignedIn state to the ShopPage component */}
-                <Route 
-                    path="/shop" 
-                    element={<ShopPage isSignedIn={isSignedIn} />} 
+                <Route
+                    path="/shop"
+                    element={<ShopPage isSignedIn={isSignedIn} />}
                 />
 
                 {/* Cart Page */}
@@ -57,6 +59,10 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+
+                {/* 2. ADD THE ROUTE HERE */}
+                <Route path="/purchased" element={<Purchased />} />
 
             </Routes>
         </>

@@ -4,6 +4,7 @@ import com.example.mudmauler.entity.User;
 import com.example.mudmauler.entity.Session;
 import com.example.mudmauler.service.UserService;
 import com.example.mudmauler.service.SessionService;
+import com.example.mudmauler.dto.UpdateProfileRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,8 @@ public class UserController {
                     user.getEmail(),
                     user.getPhone(),
                     user.getAddress(),
-                    ""   // avatar placeholder
+                    "",   // avatar placeholder
+                    user.getRole()  // user role
             );
 
             return ResponseEntity.ok(response);
@@ -68,6 +70,56 @@ public class UserController {
     public ResponseEntity<?> logout(@RequestHeader("Session-Id") String sessionId) {
         sessionService.deleteSession(sessionId);
         return ResponseEntity.ok(new ErrorResponse("Logged out successfully"));
+    }
+
+    // -------------------------
+    // GET PROFILE
+    // -------------------------
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestHeader(value = "Session-Id", required = false) String sessionId) {
+        try {
+            if (sessionId == null || sessionId.isEmpty()) {
+                return ResponseEntity.status(401).body(new ErrorResponse("Session required"));
+            }
+
+            Long userId = sessionService.getUserIdBySessionId(sessionId);
+            if (userId == null) {
+                return ResponseEntity.status(401).body(new ErrorResponse("Invalid session"));
+            }
+
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    // -------------------------
+    // UPDATE PROFILE
+    // -------------------------
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestHeader(value = "Session-Id", required = false) String sessionId,
+            @RequestBody UpdateProfileRequest request) {
+        try {
+            if (sessionId == null || sessionId.isEmpty()) {
+                return ResponseEntity.status(401).body(new ErrorResponse("Session required"));
+            }
+
+            Long userId = sessionService.getUserIdBySessionId(sessionId);
+            if (userId == null) {
+                return ResponseEntity.status(401).body(new ErrorResponse("Invalid session"));
+            }
+
+            User user = userService.updateUserProfile(userId, request);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     // ----------------------------------------------------
@@ -101,6 +153,7 @@ public class UserController {
         private String phone;
         private String address;
         private String avatar;
+        private String role;
 
         public LoginResponse(
                 String message,
@@ -110,7 +163,8 @@ public class UserController {
                 String email,
                 String phone,
                 String address,
-                String avatar
+                String avatar,
+                String role
         ) {
             this.message = message;
             this.sessionId = sessionId;
@@ -120,6 +174,7 @@ public class UserController {
             this.phone = phone;
             this.address = address;
             this.avatar = avatar;
+            this.role = role;
         }
 
         public String getMessage() { return message; }
@@ -130,6 +185,7 @@ public class UserController {
         public String getPhone() { return phone; }
         public String getAddress() { return address; }
         public String getAvatar() { return avatar; }
+        public String getRole() { return role; }
     }
 
 }

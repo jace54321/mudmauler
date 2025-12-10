@@ -48,9 +48,15 @@ const LoginPage = ({ setIsSignedIn }) => {
                 localStorage.setItem("userEmail", data.email || "");
                 localStorage.setItem("userPhone", data.phone || "");
                 localStorage.setItem("userAddress", data.address || "");
+                localStorage.setItem("userRole", data.role || "USER");
 
                 setSuccess("Login successful!");
-                navigate("/shop");
+                // Redirect to admin dashboard if user is admin, otherwise to shop
+                if (data.role === "ADMIN") {
+                    navigate("/admin");
+                } else {
+                    navigate("/shop");
+                }
                 return;
             }
 
