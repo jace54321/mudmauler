@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { products, categories } from "../data/products"; // Adjust path if needed
+// Removed useNavigate since we are no longer redirecting
+import { products, categories } from "../data/products";
 import ProductGrid from "../components/ProductGrid";
 import Footer from "../components/Footer";
 import ProductModal from "../components/ProductModal";
@@ -19,15 +20,12 @@ const Icons = {
   )
 };
 
-// FIX 1: The component must accept 'isSignedIn' as a prop
-export default function Shop({ isSignedIn }) { 
+// Receive the isSignedIn prop from App.js
+export default function Shop({ isSignedIn }) {
   const [activeCategory, setCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSection, setExpandedSection] = useState(true);
-
-  // Updated state to include 'type' (success or error)
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-
+  const [toast, setToast] = useState({ show: false, message: "" });
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Cart Logic
@@ -36,22 +34,18 @@ export default function Shop({ isSignedIn }) {
     return stored ? JSON.parse(stored) : [];
   };
 
-  // FIX 2: Remove 'isSignedIn' from the function arguments. 
-  // It now relies on the 'isSignedIn' prop from the parent scope (closure).
-  const handleAddToCart = (product) => { 
-    // --- CHECK LOGIN STATUS ---
-    if (!isSignedIn) { // 'isSignedIn' is correctly accessed from props here
-      // Show Red Error Toast
-      setToast({
-        show: true,
-        message: "Please log in to add items to cart",
-        type: "error"
-      });
-      setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2000);
-      return; // STOP EXECUTION HERE
+  const handleAddToCart = (product) => {
+    // --- AUTH CHECK ---
+    if (!isSignedIn) {
+      // Just show the error toast
+      setToast({ show: true, message: "Please log in to add items to cart!" });
+      setTimeout(() => setToast({ show: false, message: "" }), 2000);
+
+      // We removed navigate("/login"), so it stays on this page.
+      return;
     }
 
-    // --- PROCEED IF LOGGED IN ---
+    // --- EXISTING CART LOGIC (Only runs if signed in) ---
     let cart = getCart();
     const exists = cart.find((item) => item.id === product.id);
 
@@ -63,12 +57,7 @@ export default function Shop({ isSignedIn }) {
 
     localStorage.setItem("cart", JSON.stringify(cart));
 
-    // Show Green Success Toast
-    setToast({
-      show: true,
-      message: `${product.name} added to cart!`,
-      type: "success"
-    });
+    setToast({ show: true, message: `${product.name} added to cart! ` });
     setTimeout(() => setToast({ show: false, message: "" }), 2000);
 
     if (selectedProduct && selectedProduct.id === product.id) {
@@ -95,7 +84,9 @@ export default function Shop({ isSignedIn }) {
     <div className="shop-page">
       {/* Custom Toast Notification */}
       {toast.show && (
-        <div className={`custom-toast ${toast.type}`}>
+        <div className="custom-toast" style={{
+          backgroundColor: toast.message.includes("Please log in") ? "#ff4444" : "#4CAF50"
+        }}>
           {toast.message}
         </div>
       )}
@@ -177,8 +168,7 @@ export default function Shop({ isSignedIn }) {
 
           <ProductGrid
             products={filteredProducts}
-            // Child components now only need to pass the 'product'
-            addToCart={handleAddToCart} 
+            addToCart={handleAddToCart}
             onProductClick={handleCardClick}
           />
 
@@ -195,8 +185,7 @@ export default function Shop({ isSignedIn }) {
       <ProductModal
         product={selectedProduct}
         onClose={handleCloseModal}
-        // Child components now only need to pass the 'product'
-        onAddToCart={handleAddToCart} 
+        onAddToCart={handleAddToCart}
       />
     </div>
   );

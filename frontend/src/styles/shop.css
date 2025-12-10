@@ -24,14 +24,12 @@
   flex-direction: column;
 }
 
-/* =========================================
-   TOAST NOTIFICATIONS (UPDATED)
-   ========================================= */
+/* Toast */
 .custom-toast {
   position: fixed;
   top: 20px;
   right: 20px;
-  /* Removed default background so modifiers can control it */
+  background: #4CAF50;
   padding: 12px 20px;
   border-radius: 8px;
   color: white;
@@ -40,20 +38,6 @@
   z-index: 2000;
   animation: fadeIn 0.3s ease-out;
 }
-
-/* Green background for success */
-.custom-toast.success {
-  background: #4CAF50;
-}
-
-/* Red background for errors/login required */
-.custom-toast.error {
-  background: #dc2626;
-}
-
-/* =========================================
-   HEADER & LAYOUT
-   ========================================= */
 
 /* Header - Banner Style */
 .shop-header {
@@ -235,6 +219,8 @@
 .results-bar { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; }
 .results-count { color: hsl(var(--shop-accent)); font-weight: 500; }
 
+/* REMOVED .cart-button STYLES HERE */
+
 /* Grid & Cards */
 .product-grid {
   display: grid;
@@ -292,6 +278,8 @@
   transition: all 0.25s ease;
 }
 .read-more-button:hover { transform: translateY(-2px); box-shadow: 0 4px 16px hsla(var(--shop-accent), 0.35); }
+
+/* REMOVED .save-button STYLES HERE */
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
