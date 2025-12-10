@@ -37,7 +37,7 @@ const AboutPage = () => {
                   commercial trucks, and heavy-duty applications.
                 </p>
                 <p>
-                  Since our establishment in 2010, Mudmauler has built an extensive
+                  Since our establishment in 2019, Mudmauler has built an extensive
                   dealer network throughout the country, partnering with trusted
                   tire dealers and automotive specialists in every major region.
                 </p>

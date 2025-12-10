@@ -52,7 +52,8 @@ public class UserController {
                     user.getEmail(),
                     user.getPhone(),
                     user.getAddress(),
-                    ""   // avatar placeholder
+                    "",   // avatar placeholder
+                    user.getRole()  // user role
             );
 
             return ResponseEntity.ok(response);
@@ -152,6 +153,7 @@ public class UserController {
         private String phone;
         private String address;
         private String avatar;
+        private String role;
 
         public LoginResponse(
                 String message,
@@ -161,7 +163,8 @@ public class UserController {
                 String email,
                 String phone,
                 String address,
-                String avatar
+                String avatar,
+                String role
         ) {
             this.message = message;
             this.sessionId = sessionId;
@@ -171,6 +174,7 @@ public class UserController {
             this.phone = phone;
             this.address = address;
             this.avatar = avatar;
+            this.role = role;
         }
 
         public String getMessage() { return message; }
@@ -181,6 +185,7 @@ public class UserController {
         public String getPhone() { return phone; }
         public String getAddress() { return address; }
         public String getAvatar() { return avatar; }
+        public String getRole() { return role; }
     }
 
 }
