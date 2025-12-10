@@ -73,17 +73,54 @@ export default function CheckoutPage() {
         setTotals(calculateCartTotals(getCartItems()));
     }, []);
 
-    const handlePlaceOrder = () => {
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+    const handlePlaceOrder = async () => {
         if (totals.total === 0) {
             alert("Cannot place an empty order!");
             return;
         }
-        // Ideally, here you'd call a payment API, clear the cart in localStorage, and navigate.
-        alert(`Order Total: ${formatPHP(totals.total)} placed successfully!`);
 
-        // Mock success steps:
-        localStorage.removeItem("cart");
-        navigate("/order-confirmation");
+        const sessionId = localStorage.getItem("sessionId");
+        if (!sessionId) {
+            alert("Please log in to place an order");
+            navigate("/login");
+            return;
+        }
+
+        setIsPlacingOrder(true);
+
+        try {
+            const cartItems = getCartItems();
+            const orderItems = cartItems.map(item => ({
+                productId: item.id,
+                quantity: item.quantity
+            }));
+
+            const response = await fetch('http://localhost:8080/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Session-Id': sessionId
+                },
+                body: JSON.stringify({ items: orderItems })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(`Order placed successfully! Order ID: ${data.orderId}`);
+                localStorage.removeItem("cart");
+                navigate("/shop");
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to place order: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error("Error placing order:", error);
+            alert("Error connecting to server. Please try again.");
+        } finally {
+            setIsPlacingOrder(false);
+        }
     };
 
     return (
@@ -157,9 +194,9 @@ export default function CheckoutPage() {
                                 <button
                                     className="place-order-btn"
                                     onClick={handlePlaceOrder}
-                                    disabled={totals.total === 0}
+                                    disabled={totals.total === 0 || isPlacingOrder}
                                 >
-                                    Place Order
+                                    {isPlacingOrder ? "Placing Order..." : "Place Order"}
                                 </button>
                                 <button
                                     className="cancel-btn"

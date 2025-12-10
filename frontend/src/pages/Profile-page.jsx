@@ -1,10 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../styles/Profile-page.css";
 
 const ProfilePage = () => {
   const fileRef = useRef();
 
-  // Load from localStorage
+  // Load from localStorage initially
   const [profile, setProfile] = useState({
     firstName: localStorage.getItem("userFirst") || "",
     lastName: localStorage.getItem("userLast") || "",
@@ -16,6 +16,54 @@ const ProfilePage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(profile);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch profile from backend on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const sessionId = localStorage.getItem("sessionId");
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:8080/api/profile', {
+          headers: {
+            'Session-Id': sessionId
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          const updatedProfile = {
+            firstName: userData.firstName || "",
+            lastName: userData.lastName || "",
+            email: userData.email || "",
+            phone: userData.phone || "",
+            address: userData.address || "",
+            avatar: localStorage.getItem("userAvatar") || ""
+          };
+          setProfile(updatedProfile);
+          setDraft(updatedProfile);
+          
+          // Update localStorage
+          localStorage.setItem("userFirst", updatedProfile.firstName);
+          localStorage.setItem("userLast", updatedProfile.lastName);
+          localStorage.setItem("userEmail", updatedProfile.email);
+          localStorage.setItem("userPhone", updatedProfile.phone);
+          localStorage.setItem("userAddress", updatedProfile.address);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Handle avatar upload
   const handleAvatarChange = (e) => {
@@ -35,18 +83,61 @@ const ProfilePage = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
-    setProfile(draft);
+  const handleSave = async () => {
+    const sessionId = localStorage.getItem("sessionId");
+    if (!sessionId) {
+      setError("Please log in to update your profile");
+      return;
+    }
 
-    // Save everything to localStorage
-    localStorage.setItem("userFirst", draft.firstName);
-    localStorage.setItem("userLast", draft.lastName);
-    localStorage.setItem("userEmail", draft.email);
-    localStorage.setItem("userPhone", draft.phone);
-    localStorage.setItem("userAddress", draft.address);
-    localStorage.setItem("userAvatar", draft.avatar);
-
+    setError("");
     setIsEditing(false);
+
+    try {
+      const response = await fetch('http://localhost:8080/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Session-Id': sessionId
+        },
+        body: JSON.stringify({
+          firstName: draft.firstName,
+          lastName: draft.lastName,
+          email: draft.email,
+          phone: draft.phone,
+          address: draft.address
+        })
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        const updatedProfile = {
+          ...draft,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          address: updatedUser.address
+        };
+        setProfile(updatedProfile);
+
+        // Update localStorage
+        localStorage.setItem("userFirst", updatedProfile.firstName);
+        localStorage.setItem("userLast", updatedProfile.lastName);
+        localStorage.setItem("userEmail", updatedProfile.email);
+        localStorage.setItem("userPhone", updatedProfile.phone);
+        localStorage.setItem("userAddress", updatedProfile.address);
+        localStorage.setItem("userAvatar", draft.avatar);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to update profile");
+        setIsEditing(true); // Re-enable editing on error
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setError("Error connecting to server");
+      setIsEditing(true); // Re-enable editing on error
+    }
   };
 
   const handleCancel = () => {
@@ -54,9 +145,24 @@ const ProfilePage = () => {
     setIsEditing(false);
   };
 
+  if (loading) {
+    return (
+      <div className="profile-outer">
+        <div className="profile-main-card">
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="profile-outer">
       <div className="profile-main-card">
+        {error && (
+          <div style={{ color: 'red', padding: '10px', marginBottom: '20px' }}>
+            {error}
+          </div>
+        )}
 
         <div className="profile-avatar-row">
 

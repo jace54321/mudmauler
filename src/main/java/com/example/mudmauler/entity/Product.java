@@ -24,6 +24,15 @@ public class Product {
     @Column(nullable = false)
     private Float price;
 
+    @Column
+    private String category;
+
+    @Column
+    private String imageUrl;
+
+    @Column(length = 1000)
+    private String description;
+
     // Getters and setters
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
@@ -42,4 +51,13 @@ public class Product {
 
     public Float getPrice() { return price; }
     public void setPrice(Float price) { this.price = price; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }
