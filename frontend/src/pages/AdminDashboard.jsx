@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { categories } from "../data/products"; // Import categories for the dropdown
 import "../styles/admin-dashboard.css";
 
 const AdminDashboard = () => {
@@ -175,6 +176,12 @@ const ProductsTab = () => {
         }
     };
 
+    // Helper function to get the readable label from the category key
+    const getCategoryLabel = (catKey) => {
+        const found = categories.find(c => c.key === catKey);
+        return found ? found.label : catKey;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const sessionId = localStorage.getItem("sessionId");
@@ -224,6 +231,7 @@ const ProductsTab = () => {
         setShowAddForm(true);
     };
 
+    // UPDATED: Now includes error handling/alerting
     const handleDelete = async (productId) => {
         if (!window.confirm("Are you sure you want to delete this product?")) return;
 
@@ -236,9 +244,15 @@ const ProductsTab = () => {
 
             if (response.ok) {
                 fetchProducts();
+            } else {
+                // Read the error message from the server to understand why it failed
+                const errorText = await response.text();
+                alert(`Failed to delete product. Server responded: ${response.status}\n${errorText}`);
+                console.error("Delete failed:", response.status, errorText);
             }
         } catch (error) {
             console.error("Error deleting product:", error);
+            alert("A network error occurred while trying to delete.");
         }
     };
 
@@ -269,18 +283,38 @@ const ProductsTab = () => {
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 required
                             />
+
+                            {/* Dropdown for Category Selection */}
+                            <select
+                                value={formData.category}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    marginBottom: '15px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                <option value="">Select Category</option>
+                                {categories
+                                    .filter(cat => cat.key !== 'all')
+                                    .map((cat) => (
+                                        <option key={cat.key} value={cat.key}>
+                                            {cat.label}
+                                        </option>
+                                    ))
+                                }
+                            </select>
+
                             <input
                                 type="number"
                                 placeholder="Price"
                                 value={formData.price}
                                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                 required
-                            />
-                            <input
-                                type="text"
-                                placeholder="Category"
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             />
                             <input
                                 type="text"
@@ -329,7 +363,7 @@ const ProductsTab = () => {
                                 <td>{product.productId}</td>
                                 <td>{product.name}</td>
                                 <td>₱{product.price?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                                <td>{product.category || "N/A"}</td>
+                                <td>{getCategoryLabel(product.category) || "N/A"}</td>
                                 <td>{product.size || "N/A"}</td>
                                 <td>
                                     <button className="edit-btn" onClick={() => handleEdit(product)}>Edit</button>
@@ -511,4 +545,3 @@ const UsersTab = () => {
 };
 
 export default AdminDashboard;
-
