@@ -9,14 +9,25 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
 
     const handleModalAddToCart = () => {
         onAddToCart(product);
+        // Note: Closing the modal immediately after adding to cart is good UX 
+        // if the user gets a visible success notification (toast).
         onClose();
     };
+    
+    // Helper for price formatting (Consistent with ProductCard)
+    const formattedPrice = product.price.toLocaleString("en-PH", {
+        style: "currency",
+        currency: "PHP",
+        minimumFractionDigits: 2
+    });
+
 
     return (
         <div className="modal-overlay" onClick={onClose}>
+            {/* Prevent clicks inside the modal from closing the modal */}
             <div className="modal-content" onClick={e => e.stopPropagation()}>
 
-                {/* Close Button (X) - Kept outside of the main layout for absolute positioning */}
+                {/* Close Button (X) */}
                 <button className="modal-close-btn" onClick={onClose}>
                     &times;
                 </button>
@@ -26,15 +37,17 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
 
                     {/* Left Side: Image & Add to Cart */}
                     <div className="product-visual-section">
-                        <div className="image-placeholder">
-                            {/* NEW: Added a camera icon/emoji placeholder */}
-                            <span role="img" aria-label="camera" className="image-icon">
-                                📸
-                            </span>
-                            {/* In a real app, you'd use: <img src={product.imageURL} alt={product.name} /> */}
+                        {/* --- IMAGE DISPLAY FIX --- */}
+                        <div className="image-wrapper">
+                            <img 
+                                src={product.image} 
+                                alt={product.name} 
+                                className="product-modal-image" 
+                            />
                         </div>
+                        {/* ------------------------- */}
 
-                        {/* Add to Cart button matching the position in the image area */}
+                        {/* Add to Cart button */}
                         <button
                             className="add-to-cart-modal-btn"
                             onClick={handleModalAddToCart}
@@ -57,16 +70,14 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
                         <div className="detail-line detail-price">
                             <span className="detail-label">PRICE</span>
                             <span className="detail-value price-highlight">
-                                ₱{product.price ? product.price.toLocaleString('en-PH') : 'N/A'}
+                                {formattedPrice} {/* Use formatted price helper */}
                             </span>
                             <hr />
                         </div>
 
                         {/* Description Area */}
                         <p className="product-description">
-                            {product.description ||
-                                "A description is an account or representation, often in words, that provides details about the characteristics, features, or qualities of a person, place, object, or idea to help someone understand or visualize it. It involves conveying information in a way that is vivid and engaging, aiming to give the reader or listener a clear mental image of the subject."
-                            }
+                            {product.description || "No detailed description provided for this product."}
                         </p>
 
                         {/* Example of adding more design details */}

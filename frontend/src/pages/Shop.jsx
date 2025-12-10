@@ -19,7 +19,8 @@ const Icons = {
   )
 };
 
-export default function Shop() {
+// FIX 1: The component must accept 'isSignedIn' as a prop
+export default function Shop({ isSignedIn }) { 
   const [activeCategory, setCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSection, setExpandedSection] = useState(true);
@@ -35,12 +36,11 @@ export default function Shop() {
     return stored ? JSON.parse(stored) : [];
   };
 
-  const handleAddToCart = (product) => {
+  // FIX 2: Remove 'isSignedIn' from the function arguments. 
+  // It now relies on the 'isSignedIn' prop from the parent scope (closure).
+  const handleAddToCart = (product) => { 
     // --- CHECK LOGIN STATUS ---
-    // Ensure "currentUser" matches the key used in your Login page
-    const isLoggedIn = localStorage.getItem("currentUser");
-
-    if (!isLoggedIn) {
+    if (!isSignedIn) { // 'isSignedIn' is correctly accessed from props here
       // Show Red Error Toast
       setToast({
         show: true,
@@ -177,7 +177,8 @@ export default function Shop() {
 
           <ProductGrid
             products={filteredProducts}
-            addToCart={handleAddToCart}
+            // Child components now only need to pass the 'product'
+            addToCart={handleAddToCart} 
             onProductClick={handleCardClick}
           />
 
@@ -194,7 +195,8 @@ export default function Shop() {
       <ProductModal
         product={selectedProduct}
         onClose={handleCloseModal}
-        onAddToCart={handleAddToCart}
+        // Child components now only need to pass the 'product'
+        onAddToCart={handleAddToCart} 
       />
     </div>
   );

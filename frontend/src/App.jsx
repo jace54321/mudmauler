@@ -45,15 +45,17 @@ function App() {
                     element={<LoginPage setIsSignedIn={setIsSignedIn} />}
                 />
 
-                {/* Shop Page */}
-                <Route path="/shop" element={<ShopPage />} />
+                {/* FIX: Pass the isSignedIn state to the ShopPage component */}
+                <Route 
+                    path="/shop" 
+                    element={<ShopPage isSignedIn={isSignedIn} />} 
+                />
 
                 {/* Cart Page */}
                 <Route path="/cart" element={<Carts />} />
 
-                {/* ✅ Checkout Page (You were missing this!) */}
                 <Route path="/about" element={<AboutPage />} />
-                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
 
             </Routes>
