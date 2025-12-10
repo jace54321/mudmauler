@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// Removed unused useNavigate import
 import { products, categories } from "../data/products"; // Adjust path if needed
 import ProductGrid from "../components/ProductGrid";
 import Footer from "../components/Footer";
@@ -21,11 +20,13 @@ const Icons = {
 };
 
 export default function Shop() {
-  // Removed unused navigate const
   const [activeCategory, setCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSection, setExpandedSection] = useState(true);
-  const [toast, setToast] = useState({ show: false, message: "" });
+
+  // Updated state to include 'type' (success or error)
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Cart Logic
@@ -35,6 +36,22 @@ export default function Shop() {
   };
 
   const handleAddToCart = (product) => {
+    // --- CHECK LOGIN STATUS ---
+    // Ensure "currentUser" matches the key used in your Login page
+    const isLoggedIn = localStorage.getItem("currentUser");
+
+    if (!isLoggedIn) {
+      // Show Red Error Toast
+      setToast({
+        show: true,
+        message: "Please log in to add items to cart",
+        type: "error"
+      });
+      setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2000);
+      return; // STOP EXECUTION HERE
+    }
+
+    // --- PROCEED IF LOGGED IN ---
     let cart = getCart();
     const exists = cart.find((item) => item.id === product.id);
 
@@ -46,7 +63,12 @@ export default function Shop() {
 
     localStorage.setItem("cart", JSON.stringify(cart));
 
-    setToast({ show: true, message: `${product.name} added to cart!` });
+    // Show Green Success Toast
+    setToast({
+      show: true,
+      message: `${product.name} added to cart!`,
+      type: "success"
+    });
     setTimeout(() => setToast({ show: false, message: "" }), 2000);
 
     if (selectedProduct && selectedProduct.id === product.id) {
@@ -73,7 +95,7 @@ export default function Shop() {
     <div className="shop-page">
       {/* Custom Toast Notification */}
       {toast.show && (
-        <div className="custom-toast">
+        <div className={`custom-toast ${toast.type}`}>
           {toast.message}
         </div>
       )}

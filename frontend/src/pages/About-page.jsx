@@ -1,5 +1,4 @@
 import React from "react";
-import { ArrowRight } from "lucide-react"; // Removed unused imports
 import "../styles/About-page.css";
 import heroBanner from "../assets/magic.png";
 import tireProduct from "../assets/tire-product.png";
@@ -97,20 +96,8 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Join Team CTA */}
-      <section className="section section-darker cta-section">
-        <div className="container">
-          <h2 className="cta-title fade-in">Be Part of Our Team</h2>
-          <p className="cta-text fade-in delay-1">
-            Join the Mudmauler family and help us push the boundaries of off-road
-            performance. We're always looking for passionate individuals.
-          </p>
-          <button className="cta-button fade-in delay-2">
-            View Job Openings
-            <ArrowRight size={20} />
-          </button>
-        </div>
-      </section>
+
+
 
       {/* Replaced old Footer with the Component */}
       <Footer />
