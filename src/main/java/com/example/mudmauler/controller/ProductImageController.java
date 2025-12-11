@@ -35,8 +35,8 @@ public class ProductImageController {
         Optional<ProductImage> optional = service.findById(id);
         if (optional.isPresent()) {
             ProductImage existing = optional.get();
-            existing.setProductId(updated.getProductId());
-            existing.setImageId(updated.getImageId());
+            existing.setProduct(updated.getProduct());
+            existing.setImageUrl(updated.getImageUrl());
             existing.setDisplayOrder(updated.getDisplayOrder());
             return service.save(existing);
         } else {
