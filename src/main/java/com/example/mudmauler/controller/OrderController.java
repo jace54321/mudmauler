@@ -4,6 +4,7 @@ import com.example.mudmauler.entity.Order;
 import com.example.mudmauler.entity.OrderItem;
 import com.example.mudmauler.service.OrderService;
 import com.example.mudmauler.service.SessionService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,14 +38,17 @@ public class OrderController {
                 return ResponseEntity.status(401).body(Map.of("message", "Invalid session"));
             }
 
+            // 1️⃣ CREATE ORDER (OrderService also creates the payment)
             Order order = orderService.createOrder(userId, request.getItems());
+
             return ResponseEntity.ok(Map.of(
                     "message", "Order created successfully",
                     "orderId", order.getOrderId(),
-                    "totalAmount", order.getTotalAmount()
+                    "totalAmount", order.getTotalAmount(),
+                    "paymentCreated", true
             ));
+
         } catch (Exception e) {
-            // This will return the "Insufficient stock..." message to the frontend
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
@@ -64,6 +68,7 @@ public class OrderController {
 
             List<Order> orders = orderService.getUserOrders(userId);
             return ResponseEntity.ok(orders);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
@@ -88,7 +93,6 @@ public class OrderController {
                 return ResponseEntity.notFound().build();
             }
 
-            // Verify order belongs to user
             if (!order.get().getUser().getId().equals(userId)) {
                 return ResponseEntity.status(403).body(Map.of("message", "Access denied"));
             }
@@ -98,6 +102,7 @@ public class OrderController {
                     "order", order.get(),
                     "items", items
             ));
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
