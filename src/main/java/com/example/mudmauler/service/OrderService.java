@@ -1,15 +1,7 @@
 package com.example.mudmauler.service;
 
-import com.example.mudmauler.entity.Order;
-import com.example.mudmauler.entity.OrderItem;
-import com.example.mudmauler.entity.Product;
-import com.example.mudmauler.entity.User;
-import com.example.mudmauler.entity.Notification;
-import com.example.mudmauler.repository.OrderRepository;
-import com.example.mudmauler.repository.OrderItemRepository;
-import com.example.mudmauler.repository.ProductRepository;
-import com.example.mudmauler.repository.UserRepository;
-import com.example.mudmauler.repository.NotificationRepository;
+import com.example.mudmauler.entity.*;
+import com.example.mudmauler.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +28,10 @@ public class OrderService {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    // --- NEW: Inject Payment Repository ---
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     @Transactional
     public Order createOrder(Long userId, List<OrderItemRequest> items) throws Exception {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -50,39 +46,48 @@ public class OrderService {
 
         float totalAmount = 0.0f;
 
-        // Loop 1: Validation, Calculation, and STOCK DEDUCTION
+        // --- LOOP 1: Validate Stock, Deduct Quantity, Calculate Total ---
         for (OrderItemRequest itemRequest : items) {
-            Optional<Product> productOpt = productRepository.findById(itemRequest.getProductId());
-            if (productOpt.isEmpty()) {
-                throw new Exception("Product not found: " + itemRequest.getProductId());
-            }
-            Product product = productOpt.get();
+            Product product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(() -> new Exception("Product not found: " + itemRequest.getProductId()));
 
-            // --- CHANGED: Using getQuantity() instead of getStock() ---
+            // Check if enough quantity exists
             if (product.getQuantity() < itemRequest.getQuantity()) {
-                throw new Exception("Insufficient stock for product: " + product.getName() + " (Available: " + product.getQuantity() + ")");
+                throw new Exception("Insufficient stock for: " + product.getName() +
+                        " (Available: " + product.getQuantity() + ")");
             }
 
-            // --- CHANGED: Using setQuantity() instead of setStock() ---
+            // Deduct the quantity
             product.setQuantity(product.getQuantity() - itemRequest.getQuantity());
+            // Save the updated product stock immediately
             productRepository.save(product);
 
             float itemTotal = product.getPrice() * itemRequest.getQuantity();
             totalAmount += itemTotal;
         }
 
+        // Set total and save Order to generate the ID
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
 
-        // Create notification for new order
+        // --- NEW: Save Payment Record ---
+        Payment payment = new Payment();
+        payment.setOrder(savedOrder);             // Links to the Order ID just generated
+        payment.setAmount(totalAmount);           // Sets the total amount
+        payment.setPaymentDate(LocalDateTime.now()); // Sets the current timestamp
+        paymentRepository.save(payment);          // Saves to the 'payments' table
+
+        // --- Create Notification ---
         Notification notification = new Notification();
-        notification.setMessage("New order placed: Order #" + savedOrder.getOrderId() + " - ₱" + String.format("%.2f", totalAmount) + " by " + user.getFirstName() + " " + user.getLastName());
+        notification.setMessage("New order placed: Order #" + savedOrder.getOrderId() +
+                " - ₱" + String.format("%.2f", totalAmount) +
+                " by " + user.getFirstName() + " " + user.getLastName());
         notification.setType("success");
         notification.setCreatedAt(LocalDateTime.now());
         notification.setRead(false);
         notificationRepository.save(notification);
 
-        // Loop 2: Create Order Items
+        // --- LOOP 2: Create Order Items ---
         for (OrderItemRequest itemRequest : items) {
             Product product = productRepository.findById(itemRequest.getProductId()).get();
 
@@ -93,6 +98,7 @@ public class OrderService {
             orderItem.setUnitPrice(product.getPrice());
             orderItem.setTotalAmount(product.getPrice() * itemRequest.getQuantity());
             orderItem.setImageId(product.getImageId());
+
             orderItemRepository.save(orderItem);
         }
 
