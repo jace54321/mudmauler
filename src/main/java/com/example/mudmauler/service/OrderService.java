@@ -4,10 +4,12 @@ import com.example.mudmauler.entity.Order;
 import com.example.mudmauler.entity.OrderItem;
 import com.example.mudmauler.entity.Product;
 import com.example.mudmauler.entity.User;
+import com.example.mudmauler.entity.Notification;
 import com.example.mudmauler.repository.OrderRepository;
 import com.example.mudmauler.repository.OrderItemRepository;
 import com.example.mudmauler.repository.ProductRepository;
 import com.example.mudmauler.repository.UserRepository;
+import com.example.mudmauler.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,9 @@ public class OrderService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Transactional
     public Order createOrder(Long userId, List<OrderItemRequest> items) throws Exception {
@@ -56,6 +61,14 @@ public class OrderService {
 
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
+
+        // Create notification for new order
+        Notification notification = new Notification();
+        notification.setMessage("New order placed: Order #" + savedOrder.getOrderId() + " - ₱" + String.format("%.2f", totalAmount) + " by " + user.getFirstName() + " " + user.getLastName());
+        notification.setType("success");
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setRead(false);
+        notificationRepository.save(notification);
 
         // Create order items
         for (OrderItemRequest itemRequest : items) {

@@ -1,17 +1,24 @@
 package com.example.mudmauler.service;
 
 import com.example.mudmauler.entity.User;
+import com.example.mudmauler.entity.Notification;
 import com.example.mudmauler.repository.UserRepository;
+import com.example.mudmauler.repository.NotificationRepository;
 import com.example.mudmauler.dto.UpdateProfileRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -24,7 +31,17 @@ public class UserService {
         // Password hash
         user.setPassword(encoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Create notification for new user registration
+        Notification notification = new Notification();
+        notification.setMessage("New user registered: " + savedUser.getFirstName() + " " + savedUser.getLastName() + " (" + savedUser.getEmail() + ")");
+        notification.setType("info");
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setRead(false);
+        notificationRepository.save(notification);
+        
+        return savedUser;
     }
 
     public User login(String email, String password) throws Exception {
