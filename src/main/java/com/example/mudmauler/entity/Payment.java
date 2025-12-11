@@ -17,14 +17,11 @@ public class Payment {
     @Column(nullable = false)
     private LocalDateTime paymentDate;
 
+    // Renamed from 'amount' to reflect the total amount from the order
     @Column(nullable = false)
     private Float amount;
 
-    @Column(nullable = false)
-    private String paymentMethod;
-
-    @Column(nullable = false)
-    private String paymentStatus;
+    // NOTE: paymentMethod and paymentStatus fields removed as requested.
 
     // Getters and setters
     public Long getPaymentId() { return paymentId; }
@@ -38,10 +35,4 @@ public class Payment {
 
     public Float getAmount() { return amount; }
     public void setAmount(Float amount) { this.amount = amount; }
-
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-
-    public String getPaymentStatus() { return paymentStatus; }
-    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
 }
