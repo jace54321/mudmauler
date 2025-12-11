@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../data/products"; // Import categories for the dropdown
 import {
@@ -28,6 +28,79 @@ ChartJS.register(
     Tooltip,
     Legend
 );
+
+// --- START: Sorting Hook Utility (Reused in all tables) ---
+const useSortableData = (items, config = null) => {
+    const [sortConfig, setSortConfig] = useState(config);
+
+    const sortedItems = useMemo(() => {
+        let sortableItems = [...items];
+        if (sortConfig !== null) {
+            sortableItems.sort((a, b) => {
+                // Special handling for nested properties (like 'user.lastName' in OrdersTab)
+                let aValue = a[sortConfig.key];
+                let bValue = b[sortConfig.key];
+
+                if (sortConfig.key === 'user') {
+                    // For user sort, default to lastName
+                    aValue = a.user?.lastName || '';
+                    bValue = b.user?.lastName || '';
+                } else if (sortConfig.key === 'productName') {
+                    // For Orders, sort by the first product name
+                     aValue = (a.items?.[0]?.product?.name || '');
+                     bValue = (b.items?.[0]?.product?.name || '');
+                } else if (sortConfig.key === 'totalQuantity') {
+                    aValue = a.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                    bValue = b.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                }
+                
+                // Convert to number if applicable, but keep strings for comparison
+                const isNumeric = !isNaN(parseFloat(aValue)) && isFinite(aValue) && !isNaN(parseFloat(bValue)) && isFinite(bValue);
+
+                if (isNumeric) {
+                    aValue = parseFloat(aValue);
+                    bValue = parseFloat(bValue);
+                } else if (typeof aValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                if (aValue < bValue) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [items, sortConfig]);
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (
+            sortConfig &&
+            sortConfig.key === key &&
+            sortConfig.direction === 'ascending'
+        ) {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    return { items: sortedItems, requestSort, sortConfig };
+};
+
+// Helper component to display sort direction indicator
+const SortIcon = ({ sortConfig, columnKey }) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+        return <span style={{ opacity: 0.3 }}>↕</span>;
+    }
+    return sortConfig.direction === 'ascending' ? <span>↑</span> : <span>↓</span>;
+};
+// --- END: Sorting Hook Utility ---
+
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -137,6 +210,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="admin-content">
+                {/* Use a placeholder image for dashboard visualization to give the user a sense of the result. */}
                 {activeTab === "dashboard" && <DashboardTab stats={stats} />}
                 {activeTab === "products" && <ProductsTab setAlert={setAlert} />}
                 {activeTab === "orders" && <OrdersTab />}
@@ -162,7 +236,7 @@ const AdminDashboard = () => {
 // Dashboard Tab Component
 const DashboardTab = ({ stats }) => {
     const [notifications, setNotifications] = useState([]);
-    const [activeChartTab, setActiveChartTab] = useState("users");
+    const [activeChartTab, setActiveChartTab] = useState("revenue");
 
     useEffect(() => {
         fetchNotifications();
@@ -413,6 +487,8 @@ const DashboardTab = ({ stats }) => {
                             </button>
                         </div>
                         <div className="chart-wrapper">
+                            {/* NOTE: All three buttons currently display the same revenue data due to placeholder data setup. */}
+                            {/*  */}
                             {activeChartTab === "users" && (
                                 <Line data={lineChartData} options={chartOptions} />
                             )}
@@ -427,15 +503,17 @@ const DashboardTab = ({ stats }) => {
 
                     <div className="charts-row">
                         <div className="chart-card">
-                            <h3>Manage Orders</h3>
+                            <h3>Orders by Category</h3>
                             <div className="chart-wrapper">
+                                {/*  */}
                                 <Bar data={barChartData} options={chartOptions} />
                             </div>
                         </div>
 
                         <div className="chart-card">
-                            <h3>Traffic by Location</h3>
+                            <h3>Product Distribution</h3>
                             <div className="chart-wrapper">
+                                {/*  */}
                                 <Pie data={pieChartData} options={pieChartOptions} />
                             </div>
                         </div>
@@ -448,7 +526,7 @@ const DashboardTab = ({ stats }) => {
                         <div className="notifications-list">
                             {notifications.length === 0 ? (
                                 <div className="notification-item">
-                                    <p>You fixed a bug</p>
+                                    <p>No new notifications</p>
                                     <span className="notification-time">Just now</span>
                                 </div>
                             ) : (
@@ -471,7 +549,7 @@ const DashboardTab = ({ stats }) => {
     );
 };
 
-// --- UPDATED PRODUCTS TAB ---
+// --- UPDATED PRODUCTS TAB (with Sorting) ---
 const ProductsTab = ({ setAlert }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -479,7 +557,13 @@ const ProductsTab = ({ setAlert }) => {
     const [previousProduct, setPreviousProduct] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
 
-    // UPDATED: Added quantity to form state
+    // Initial sort state: Sort by product ID, ascending
+    const { 
+        items: sortedProducts, 
+        requestSort, 
+        sortConfig 
+    } = useSortableData(products, { key: 'productId', direction: 'ascending' });
+
     const [formData, setFormData] = useState({
         name: "",
         price: "",
@@ -487,7 +571,7 @@ const ProductsTab = ({ setAlert }) => {
         description: "",
         imageUrl: "",
         size: "",
-        quantity: "" // New quantity field
+        quantity: ""
     });
 
     useEffect(() => {
@@ -522,7 +606,6 @@ const ProductsTab = ({ setAlert }) => {
             : 'http://localhost:8080/api/admin/products';
         const method = editingProduct ? 'PUT' : 'POST';
 
-        // UPDATED: Include quantity in payload
         const productData = {
             name: formData.name,
             price: parseFloat(formData.price),
@@ -564,7 +647,7 @@ const ProductsTab = ({ setAlert }) => {
                                         description: previousProduct.description,
                                         imageUrl: previousProduct.imageUrl,
                                         size: previousProduct.size,
-                                        quantity: previousProduct.quantity // Undo quantity too
+                                        quantity: previousProduct.quantity 
                                     })
                                 });
                                 if (undoResponse.ok) {
@@ -593,7 +676,7 @@ const ProductsTab = ({ setAlert }) => {
         // Store previous product state for undo
         setPreviousProduct({ ...product });
         setEditingProduct(product);
-        // UPDATED: Load existing stock into form
+        // Load existing stock into form
         setFormData({
             name: product.name || "",
             price: product.price || "",
@@ -670,8 +753,8 @@ const ProductsTab = ({ setAlert }) => {
 
     return (
         <div className="products-tab">
+            <h2>Products Management</h2>
             <div className="tab-header">
-                <h2>Products Management</h2>
                 <button className="add-btn" onClick={() => {
                     setShowAddForm(true);
                     setEditingProduct(null);
@@ -719,7 +802,7 @@ const ProductsTab = ({ setAlert }) => {
                                 }
                             </select>
 
-                            {/* UPDATED: Flex row for Price and Stock Qty */}
+                            {/* Flex row for Price and Stock Qty */}
                             <div style={{display:'flex', gap:'10px'}}>
                                 <input
                                     type="number"
@@ -773,22 +856,34 @@ const ProductsTab = ({ setAlert }) => {
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Stock</th> {/* UPDATED: New Stock Column */}
-                            <th>Category</th>
-                            <th>Size</th>
+                            <th onClick={() => requestSort('productId')} style={{ cursor: 'pointer' }}>
+                                ID <SortIcon sortConfig={sortConfig} columnKey="productId" />
+                            </th>
+                            <th onClick={() => requestSort('name')} style={{ cursor: 'pointer' }}>
+                                Name <SortIcon sortConfig={sortConfig} columnKey="name" />
+                            </th>
+                            <th onClick={() => requestSort('price')} style={{ cursor: 'pointer' }}>
+                                Price <SortIcon sortConfig={sortConfig} columnKey="price" />
+                            </th>
+                            <th onClick={() => requestSort('quantity')} style={{ cursor: 'pointer' }}>
+                                Stock <SortIcon sortConfig={sortConfig} columnKey="quantity" />
+                            </th>
+                            <th onClick={() => requestSort('category')} style={{ cursor: 'pointer' }}>
+                                Category <SortIcon sortConfig={sortConfig} columnKey="category" />
+                            </th>
+                            <th onClick={() => requestSort('size')} style={{ cursor: 'pointer' }}>
+                                Size <SortIcon sortConfig={sortConfig} columnKey="size" />
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(product => (
+                        {sortedProducts.map(product => (
                             <tr key={product.productId}>
                                 <td>{product.productId}</td>
                                 <td>{product.name}</td>
                                 <td>₱{product.price?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                                {/* UPDATED: Stock Cell with conditional color */}
+                                {/* Stock Cell with conditional color */}
                                 <td style={{ color: (!product.quantity || product.quantity === 0) ? 'red' : 'inherit', fontWeight: (!product.quantity || product.quantity === 0) ? 'bold' : 'normal' }}>
                                     {product.quantity !== undefined ? product.quantity : '0'}
                                 </td>
@@ -807,10 +902,17 @@ const ProductsTab = ({ setAlert }) => {
     );
 };
 
-// Orders Tab Component
+// --- UPDATED Orders Tab Component (with Sorting) ---
 const OrdersTab = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Initial sort state: Sort by date, descending (most recent first)
+    const { 
+        items: sortedOrders, 
+        requestSort, 
+        sortConfig 
+    } = useSortableData(orders, { key: 'orderDate', direction: 'descending' });
 
     useEffect(() => {
         fetchOrders();
@@ -842,23 +944,35 @@ const OrdersTab = () => {
                 <table>
                     <thead>
                         <tr>
-                            <th>Order Date</th>
-                            <th>Order ID</th>
-                            <th>User</th>
-                            <th>Products</th>
-                            <th>Total Quantity</th>
-                            <th>Total Amount</th>
+                            <th onClick={() => requestSort('orderDate')} style={{ cursor: 'pointer' }}>
+                                Order Date <SortIcon sortConfig={sortConfig} columnKey="orderDate" />
+                            </th>
+                            <th onClick={() => requestSort('orderId')} style={{ cursor: 'pointer' }}>
+                                Order ID <SortIcon sortConfig={sortConfig} columnKey="orderId" />
+                            </th>
+                            <th onClick={() => requestSort('user')} style={{ cursor: 'pointer' }}>
+                                User <SortIcon sortConfig={sortConfig} columnKey="user" />
+                            </th>
+                            <th onClick={() => requestSort('productName')} style={{ cursor: 'pointer' }}>
+                                Products <SortIcon sortConfig={sortConfig} columnKey="productName" />
+                            </th>
+                            <th onClick={() => requestSort('totalQuantity')} style={{ cursor: 'pointer' }}>
+                                Total Quantity <SortIcon sortConfig={sortConfig} columnKey="totalQuantity" />
+                            </th>
+                            <th onClick={() => requestSort('totalAmount')} style={{ cursor: 'pointer' }}>
+                                Total Amount <SortIcon sortConfig={sortConfig} columnKey="totalAmount" />
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.length === 0 ? (
+                        {sortedOrders.length === 0 ? (
                             <tr>
                                 <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                                     No orders found
                                 </td>
                             </tr>
                         ) : (
-                            orders.map(order => {
+                            sortedOrders.map(order => {
                                 const items = order.items || [];
                                 const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
@@ -920,10 +1034,17 @@ const OrdersTab = () => {
     );
 };
 
-// Users Tab Component
+// --- UPDATED Users Tab Component (with Sorting) ---
 const UsersTab = ({ setAlert }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // Initial sort state: Sort by last name, ascending
+    const { 
+        items: sortedUsers, 
+        requestSort, 
+        sortConfig 
+    } = useSortableData(users, { key: 'lastName', direction: 'ascending' });
 
     useEffect(() => {
         fetchUsers();
@@ -1034,16 +1155,26 @@ const UsersTab = ({ setAlert }) => {
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Role</th>
+                            <th onClick={() => requestSort('id')} style={{ cursor: 'pointer' }}>
+                                ID <SortIcon sortConfig={sortConfig} columnKey="id" />
+                            </th>
+                            <th onClick={() => requestSort('lastName')} style={{ cursor: 'pointer' }}>
+                                Name <SortIcon sortConfig={sortConfig} columnKey="lastName" />
+                            </th>
+                            <th onClick={() => requestSort('email')} style={{ cursor: 'pointer' }}>
+                                Email <SortIcon sortConfig={sortConfig} columnKey="email" />
+                            </th>
+                            <th onClick={() => requestSort('phone')} style={{ cursor: 'pointer' }}>
+                                Phone <SortIcon sortConfig={sortConfig} columnKey="phone" />
+                            </th>
+                            <th onClick={() => requestSort('role')} style={{ cursor: 'pointer' }}>
+                                Role <SortIcon sortConfig={sortConfig} columnKey="role" />
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(user => (
+                        {sortedUsers.map(user => (
                             <tr key={user.id}>
                                 <td>{user.id}</td>
                                 <td>{user.firstName} {user.lastName}</td>
