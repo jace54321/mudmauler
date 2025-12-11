@@ -1,7 +1,7 @@
 package com.example.mudmauler.entity;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore; // Import this to prevent infinite recursion
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 @Entity
@@ -35,13 +35,14 @@ public class Product {
     @Column(length = 1000)
     private String description;
 
-    // --- THE FIX IS HERE ---
-    // This connects the Product to the OrderItems table.
-    // cascade = CascadeType.ALL means: "If I delete this Product, delete the connection to OrderItems too."
+    // --- NEW FIELD FOR STOCK MANAGEMENT ---
+    @Column(columnDefinition = "integer default 0")
+    private Integer quantity;
+    // --------------------------------------
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    @JsonIgnore // Important: Prevents your API from trying to load all orders when you just want product info
+    @JsonIgnore
     private List<OrderItem> orderItems;
-    // -----------------------
 
     // Getters and setters
     public Long getProductId() { return productId; }
@@ -71,7 +72,11 @@ public class Product {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    // Getter and Setter for the new list (required by JPA)
+    // --- NEW GETTER AND SETTER FOR QUANTITY ---
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    // ------------------------------------------
+
     public List<OrderItem> getOrderItems() { return orderItems; }
     public void setOrderItems(List<OrderItem> orderItems) { this.orderItems = orderItems; }
 }

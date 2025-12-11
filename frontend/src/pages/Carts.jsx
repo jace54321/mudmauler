@@ -12,8 +12,6 @@ const formatPHP = (amount) =>
 export default function Cart() {
     const navigate = useNavigate();
 
-    // FIXED: Load data immediately inside useState (Lazy Initialization).
-    // This prevents the cart from being overwritten with [] on the first render.
     const [cart, setCart] = useState(() => {
         const stored = localStorage.getItem("cart");
         return stored ? JSON.parse(stored) : [];
@@ -24,11 +22,56 @@ export default function Cart() {
         localStorage.setItem("cart", JSON.stringify(cart));
     }, [cart]);
 
+    // --- NEW: VALIDATE CART ON LOAD ---
+    // This checks if items in the cart still exist in the backend.
+    useEffect(() => {
+        const validateCartItems = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/products');
+                if (response.ok) {
+                    const activeProducts = await response.json();
+
+                    setCart((currentCart) => {
+                        // Filter the cart: Keep item ONLY if it exists in the activeProducts list
+                        const validated = currentCart.filter(cartItem =>
+                            activeProducts.some(p => p.productId === cartItem.id)
+                        ).map(cartItem => {
+                            // Also update the stock/price in case admin changed it
+                            const freshProduct = activeProducts.find(p => p.productId === cartItem.id);
+                            return {
+                                ...cartItem,
+                                price: freshProduct.price, // Sync price
+                                stock: freshProduct.quantity !== undefined ? freshProduct.quantity : 0, // Sync stock
+                                // Ensure quantity doesn't exceed new stock
+                                quantity: Math.min(cartItem.quantity, (freshProduct.quantity !== undefined ? freshProduct.quantity : 0))
+                            };
+                        });
+
+                        // Optional: If items were removed, you could alert the user here
+                        if (validated.length < currentCart.length) {
+                           // console.log("Some items were removed because they are no longer available.");
+                        }
+                        return validated;
+                    });
+                }
+            } catch (error) {
+                console.error("Error validating cart:", error);
+            }
+        };
+
+        validateCartItems();
+    }, []);
+    // ----------------------------------
+
     const increaseQty = (id) =>
         setCart((items) =>
-            items.map((item) =>
-                item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-            )
+            items.map((item) => {
+                if (item.id === id) {
+                    const limit = item.stock !== undefined ? item.stock : 100;
+                    return { ...item, quantity: Math.min(limit, item.quantity + 1) };
+                }
+                return item;
+            })
         );
 
     const decreaseQty = (id) =>
@@ -98,6 +141,12 @@ export default function Cart() {
                                 </span>
                                 <span className="cart-unit">per tire</span>
 
+                                {item.stock !== undefined && item.stock < 10 && (
+                                    <div style={{ fontSize: '12px', color: '#d32f2f', marginTop: '4px', fontWeight: '500' }}>
+                                        Only {item.stock} left in stock
+                                    </div>
+                                )}
+
                                 <div className="cart-item-controls">
                                     <button
                                         onClick={() => decreaseQty(item.id)}
@@ -108,7 +157,15 @@ export default function Cart() {
 
                                     <span>{item.quantity}</span>
 
-                                    <button onClick={() => increaseQty(item.id)}>
+                                    <button
+                                        onClick={() => increaseQty(item.id)}
+                                        disabled={item.stock !== undefined && item.quantity >= item.stock}
+                                        style={{
+                                            opacity: (item.stock !== undefined && item.quantity >= item.stock) ? 0.5 : 1,
+                                            cursor: (item.stock !== undefined && item.quantity >= item.stock) ? 'not-allowed' : 'pointer'
+                                        }}
+                                        title={item.quantity >= item.stock ? "Stock limit reached" : "Add one"}
+                                    >
                                         +
                                     </button>
                                 </div>

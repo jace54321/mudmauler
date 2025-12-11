@@ -41,15 +41,33 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        // Default quantity to 0 if not provided
+        if (product.getQuantity() == null) {
+            product.setQuantity(0);
+        }
         return ResponseEntity.ok(productService.saveProduct(product));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        Optional<Product> existing = productService.getProductById(id);
-        if (existing.isPresent()) {
-            product.setProductId(id);
-            return ResponseEntity.ok(productService.saveProduct(product));
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+        Optional<Product> existingOptional = productService.getProductById(id);
+
+        if (existingOptional.isPresent()) {
+            Product existingProduct = existingOptional.get();
+
+            // Explicitly update fields to ensure existing relationships (like orderItems) aren't lost
+            existingProduct.setName(productDetails.getName());
+            existingProduct.setPrice(productDetails.getPrice());
+            existingProduct.setCategory(productDetails.getCategory());
+            existingProduct.setDescription(productDetails.getDescription());
+            existingProduct.setImageUrl(productDetails.getImageUrl());
+            existingProduct.setSize(productDetails.getSize());
+
+            // --- UPDATE QUANTITY ---
+            existingProduct.setQuantity(productDetails.getQuantity());
+            // -----------------------
+
+            return ResponseEntity.ok(productService.saveProduct(existingProduct));
         }
         return ResponseEntity.notFound().build();
     }
@@ -60,4 +78,3 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 }
-

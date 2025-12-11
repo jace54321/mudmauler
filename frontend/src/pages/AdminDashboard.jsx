@@ -214,7 +214,7 @@ const DashboardTab = ({ stats }) => {
         if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
         if (diffDays === 1) return "Yesterday";
         if (diffDays < 7) return `${diffDays} days ago`;
-        
+
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     };
 
@@ -393,19 +393,19 @@ const DashboardTab = ({ stats }) => {
                 <div className="charts-column">
                     <div className="chart-card large-chart">
                         <div className="chart-tabs">
-                            <button 
+                            <button
                                 className={activeChartTab === "users" ? "active" : ""}
                                 onClick={() => setActiveChartTab("users")}
                             >
                                 Total Users
                             </button>
-                            <button 
+                            <button
                                 className={activeChartTab === "revenue" ? "active" : ""}
                                 onClick={() => setActiveChartTab("revenue")}
                             >
                                 Revenue
                             </button>
-                            <button 
+                            <button
                                 className={activeChartTab === "orders" ? "active" : ""}
                                 onClick={() => setActiveChartTab("orders")}
                             >
@@ -453,8 +453,8 @@ const DashboardTab = ({ stats }) => {
                                 </div>
                             ) : (
                                 notifications.slice(0, 5).map(notification => (
-                                    <div 
-                                        key={notification.id} 
+                                    <div
+                                        key={notification.id}
                                         className={`notification-item ${!notification.read ? 'unread' : ''}`}
                                         onClick={() => markAsRead(notification.id)}
                                     >
@@ -471,20 +471,23 @@ const DashboardTab = ({ stats }) => {
     );
 };
 
-// Products Tab Component
+// --- UPDATED PRODUCTS TAB ---
 const ProductsTab = ({ setAlert }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingProduct, setEditingProduct] = useState(null);
     const [previousProduct, setPreviousProduct] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
+
+    // UPDATED: Added quantity to form state
     const [formData, setFormData] = useState({
         name: "",
         price: "",
         category: "",
         description: "",
         imageUrl: "",
-        size: ""
+        size: "",
+        quantity: "" // New quantity field
     });
 
     useEffect(() => {
@@ -519,13 +522,15 @@ const ProductsTab = ({ setAlert }) => {
             : 'http://localhost:8080/api/admin/products';
         const method = editingProduct ? 'PUT' : 'POST';
 
+        // UPDATED: Include quantity in payload
         const productData = {
             name: formData.name,
             price: parseFloat(formData.price),
             category: formData.category,
             description: formData.description,
             imageUrl: formData.imageUrl,
-            size: formData.size
+            size: formData.size,
+            quantity: parseInt(formData.quantity) || 0 // Parse integer for stock
         };
 
         try {
@@ -558,7 +563,8 @@ const ProductsTab = ({ setAlert }) => {
                                         category: previousProduct.category,
                                         description: previousProduct.description,
                                         imageUrl: previousProduct.imageUrl,
-                                        size: previousProduct.size
+                                        size: previousProduct.size,
+                                        quantity: previousProduct.quantity // Undo quantity too
                                     })
                                 });
                                 if (undoResponse.ok) {
@@ -576,7 +582,7 @@ const ProductsTab = ({ setAlert }) => {
                 setShowAddForm(false);
                 setEditingProduct(null);
                 setPreviousProduct(null);
-                setFormData({ name: "", price: "", category: "", description: "", imageUrl: "", size: "" });
+                setFormData({ name: "", price: "", category: "", description: "", imageUrl: "", size: "", quantity: "" });
             }
         } catch (error) {
             console.error("Error saving product:", error);
@@ -587,13 +593,15 @@ const ProductsTab = ({ setAlert }) => {
         // Store previous product state for undo
         setPreviousProduct({ ...product });
         setEditingProduct(product);
+        // UPDATED: Load existing stock into form
         setFormData({
             name: product.name || "",
             price: product.price || "",
             category: product.category || "",
             description: product.description || "",
             imageUrl: product.imageUrl || "",
-            size: product.size || ""
+            size: product.size || "",
+            quantity: product.quantity !== undefined ? product.quantity : 0
         });
         setShowAddForm(true);
     };
@@ -613,9 +621,9 @@ const ProductsTab = ({ setAlert }) => {
             if (response.ok) {
                 const data = await response.json();
                 const deletedProduct = data.deletedProduct;
-                
+
                 fetchProducts();
-                
+
                 // Show undo alert
                 setAlert({
                     type: 'warning',
@@ -667,7 +675,7 @@ const ProductsTab = ({ setAlert }) => {
                 <button className="add-btn" onClick={() => {
                     setShowAddForm(true);
                     setEditingProduct(null);
-                    setFormData({ name: "", price: "", category: "", description: "", imageUrl: "", size: "" });
+                    setFormData({ name: "", price: "", category: "", description: "", imageUrl: "", size: "", quantity: "" });
                 }}>
                     Add Product
                 </button>
@@ -711,13 +719,27 @@ const ProductsTab = ({ setAlert }) => {
                                 }
                             </select>
 
-                            <input
-                                type="number"
-                                placeholder="Price"
-                                value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                required
-                            />
+                            {/* UPDATED: Flex row for Price and Stock Qty */}
+                            <div style={{display:'flex', gap:'10px'}}>
+                                <input
+                                    type="number"
+                                    placeholder="Price"
+                                    value={formData.price}
+                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    required
+                                    style={{ flex: 1 }}
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Stock Qty"
+                                    value={formData.quantity}
+                                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                                    required
+                                    min="0"
+                                    style={{ flex: 1 }}
+                                />
+                            </div>
+
                             <input
                                 type="text"
                                 placeholder="Size"
@@ -754,6 +776,7 @@ const ProductsTab = ({ setAlert }) => {
                             <th>ID</th>
                             <th>Name</th>
                             <th>Price</th>
+                            <th>Stock</th> {/* UPDATED: New Stock Column */}
                             <th>Category</th>
                             <th>Size</th>
                             <th>Actions</th>
@@ -765,6 +788,10 @@ const ProductsTab = ({ setAlert }) => {
                                 <td>{product.productId}</td>
                                 <td>{product.name}</td>
                                 <td>₱{product.price?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                                {/* UPDATED: Stock Cell with conditional color */}
+                                <td style={{ color: (!product.quantity || product.quantity === 0) ? 'red' : 'inherit', fontWeight: (!product.quantity || product.quantity === 0) ? 'bold' : 'normal' }}>
+                                    {product.quantity !== undefined ? product.quantity : '0'}
+                                </td>
                                 <td>{getCategoryLabel(product.category) || "N/A"}</td>
                                 <td>{product.size || "N/A"}</td>
                                 <td>
@@ -834,7 +861,7 @@ const OrdersTab = () => {
                             orders.map(order => {
                                 const items = order.items || [];
                                 const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
-                                
+
                                 return (
                                     <tr key={order.orderId}>
                                         <td>{new Date(order.orderDate).toLocaleString()}</td>
@@ -953,9 +980,9 @@ const UsersTab = ({ setAlert }) => {
             if (response.ok) {
                 const data = await response.json();
                 const deletedUser = data.deletedUser;
-                
+
                 fetchUsers();
-                
+
                 // Show undo alert
                 setAlert({
                     type: 'warning',
