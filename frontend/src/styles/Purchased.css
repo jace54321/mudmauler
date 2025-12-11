@@ -4,30 +4,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  /* FIX: Set height to 100vh and overflow hidden to remove unnecessary scrollbar */
+  height: 90vh;
+  overflow: hidden;
+  padding: 0;
   /* Dark background to match the main site */
   background-color: #121212;
   width: 100%;
 }
 
-.success-card {
+.success-card-single {
   text-align: center;
   /* Darker card background */
   background: #1E1E1E;
   padding: 50px 40px;
-  border-radius: 4px; /* Sharper corners for a rugged look */
-  /* Subtle dark shadow and a thin dark border */
+  border-radius: 4px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 1px solid #333;
   max-width: 450px;
   width: 90%;
+  display: block;
 }
+
+/* ... Existing styles for checkmark-circle, h1, p ... */
 
 .checkmark-circle {
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  /* Dark red background with a bright red border */
   background-color: rgba(229, 57, 53, 0.1);
   border: 3px solid #E53935;
   display: flex;
@@ -37,14 +41,12 @@
 }
 
 .success-icon {
-  /* MUDMAULER Red */
   color: #E53935;
   font-size: 45px;
   font-weight: 900;
 }
 
 h1 {
-  /* White text, uppercase, bold */
   color: #FFFFFF;
   margin-bottom: 15px;
   font-size: 28px;
@@ -54,21 +56,53 @@ h1 {
 }
 
 p {
-  /* Light gray text for better readability on dark background */
   color: #B0BEC5;
   margin-bottom: 40px;
   line-height: 1.6;
   font-size: 16px;
 }
 
+/* --- BUTTON STYLES --- */
+
+/* View / Download Receipt Button */
+.btn-view-receipt {
+    display: inline-block;
+    width: auto;
+    margin-bottom: 20px;
+
+    background-color: transparent;
+    color: #E53935;
+    border: 2px solid #E53935;
+    padding: 15px 35px;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.btn-view-receipt:hover {
+    background-color: #E53935;
+    color: white;
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Return to Shop Button (Centered) */
 .btn-shop {
+  /* Ensure it's treated as a block/inline-block and centered by the parent text-align: center */
   display: inline-block;
+  margin: 0 auto;
+  width: fit-content;
+
   /* MUDMAULER Red background */
   background-color: #E53935;
   color: white;
   padding: 15px 35px;
   text-decoration: none;
-  border-radius: 2px; /* Sharp corners */
+  border-radius: 2px;
   transition: all 0.3s ease;
   font-weight: 700;
   text-transform: uppercase;

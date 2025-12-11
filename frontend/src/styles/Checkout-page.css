@@ -229,3 +229,114 @@
         max-width: 100%;
     }
 }
+
+/* --- Styles for Editing Mode --- */
+
+.address-edit-box {
+    /* Style for the container when inputs are visible */
+    padding: 15px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #222;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left; /* Align labels and inputs correctly */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #B0BEC5; /* Light gray for labels */
+    font-size: 0.9em;
+}
+
+.address-input,
+.address-textarea {
+    width: 100%;
+    padding: 8px 10px;
+    background-color: #333; /* Dark input background */
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #FFFFFF; /* White text input */
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: vertical; /* Allow resizing of textarea */
+}
+
+.address-textarea {
+    min-height: 80px;
+}
+
+.address-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-cancel-edit {
+    background-color: #555;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-cancel-edit:hover {
+    background-color: #777;
+}
+
+.btn-save-address {
+    background-color: #E53935; /* MUDMAULER Red */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.2s;
+}
+
+.btn-save-address:hover {
+    background-color: #C62828;
+}
+
+/* --- Styles for Viewing Mode (Existing) --- */
+
+.address-details-box {
+    padding: 15px 0; /* Adjust padding as needed */
+    text-align: left;
+}
+
+.address-recipient-name {
+    font-weight: bold;
+    color: #FFFFFF;
+    margin-bottom: 5px;
+}
+
+.address-text {
+    margin-bottom: 15px;
+    color: #B0BEC5;
+}
+
+.change-address-btn {
+    /* Style for the CHANGE button in viewing mode */
+    background: none;
+    border: 1px solid #E53935;
+    color: #E53935;
+    padding: 5px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.2s;
+}
+
+.change-address-btn:hover {
+    background-color: #E53935;
+    color: white;
+}

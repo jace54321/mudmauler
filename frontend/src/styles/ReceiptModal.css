@@ -1,0 +1,61 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    /* FIX: Change background to white */
+    background: #FFFFFF;
+    padding: 30px;
+    border-radius: 4px;
+    position: relative;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #E53935;
+    font-size: 30px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-download {
+    background-color: #E53935;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: background-color 0.3s;
+}
+
+.btn-download:hover:not(:disabled) {
+    background-color: #C62828;
+}
+
+.btn-download:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
