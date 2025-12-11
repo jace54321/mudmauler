@@ -44,6 +44,7 @@ public class OrderController {
                     "totalAmount", order.getTotalAmount()
             ));
         } catch (Exception e) {
+            // This will return the "Insufficient stock..." message to the frontend
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
@@ -110,4 +111,3 @@ public class OrderController {
         public void setItems(List<OrderService.OrderItemRequest> items) { this.items = items; }
     }
 }
-

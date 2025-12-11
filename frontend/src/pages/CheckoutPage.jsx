@@ -71,12 +71,12 @@ export default function CheckoutPage() {
     const [isEditingAddress, setIsEditingAddress] = useState(false);
     const [tempAddress, setTempAddress] = useState(shippingAddress);
 
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
     useEffect(() => {
         setTotals(calculateCartTotals(cartItems));
     }, [cartItems]);
 
-    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
     // Function to handle saving the new address
     const handleSaveAddress = () => {
@@ -102,6 +102,7 @@ export default function CheckoutPage() {
             return;
         }
 
+        // 1. Get Session ID (Matches your Backend Controller)
         const sessionId = localStorage.getItem("sessionId");
         if (!sessionId) {
             alert("Please log in to place an order");
@@ -112,26 +113,31 @@ export default function CheckoutPage() {
         setIsPlacingOrder(true);
 
         try {
-            const orderItems = cartItems.map(item => ({
-                productId: item.id,
-                quantity: item.quantity
-            }));
+            // 2. Prepare payload exactly as Backend expects (CreateOrderRequest)
+            const orderPayload = {
+                items: cartItems.map(item => ({
+                    productId: item.id,
+                    quantity: item.quantity
+                }))
+            };
 
             const response = await fetch('http://localhost:8080/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Session-Id': sessionId
+                    'Session-Id': sessionId  // Sending the session ID header
                 },
-                body: JSON.stringify({ items: orderItems })
+                body: JSON.stringify(orderPayload)
             });
 
-            if (response.ok) {
-                await response.json();
+            const data = await response.json();
 
-                // --- Prepare and pass the receipt data ---
+            if (response.ok) {
+                // --- Success! Backend has already deducted stock ---
+
+                // Prepare receipt data
                 const receiptData = {
-                    orderId: `ORD-${Date.now()}`,
+                    orderId: `ORD-${data.orderId}`, // Use ID from backend response
                     date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
                     items: cartItems.map(item => ({
                         name: item.name,
@@ -141,20 +147,21 @@ export default function CheckoutPage() {
                     subtotal: totals.subtotal,
                     shipping: totals.shipping,
                     tax: totals.tax,
-                    total: totals.total,
+                    total: totals.total, // Or use data.totalAmount from backend to be safe
                     paymentMethod: paymentMethods.find(m => m.id === selectedPayment).name,
-                    // Use the CURRENTLY saved shipping address state
                     shippingAddress: shippingAddress.address,
                     taxRate: totals.taxRate
                 };
 
+                // Clear cart locally
                 localStorage.removeItem("cart");
 
+                // Navigate to success page
                 navigate("/purchased", { state: { receiptData: receiptData } });
 
             } else {
-                const errorData = await response.json();
-                alert(`Failed to place order: ${errorData.message || 'Unknown error'}`);
+                // --- Failure (e.g., Insufficient Stock) ---
+                alert(`Failed to place order: ${data.message || 'Unknown error'}`);
             }
         } catch (error) {
             console.error("Error placing order:", error);

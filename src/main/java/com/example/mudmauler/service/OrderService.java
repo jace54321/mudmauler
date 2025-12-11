@@ -47,14 +47,26 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
-        
+
         float totalAmount = 0.0f;
+
+        // Loop 1: Validation, Calculation, and STOCK DEDUCTION
         for (OrderItemRequest itemRequest : items) {
             Optional<Product> productOpt = productRepository.findById(itemRequest.getProductId());
             if (productOpt.isEmpty()) {
                 throw new Exception("Product not found: " + itemRequest.getProductId());
             }
             Product product = productOpt.get();
+
+            // --- CHANGED: Using getQuantity() instead of getStock() ---
+            if (product.getQuantity() < itemRequest.getQuantity()) {
+                throw new Exception("Insufficient stock for product: " + product.getName() + " (Available: " + product.getQuantity() + ")");
+            }
+
+            // --- CHANGED: Using setQuantity() instead of setStock() ---
+            product.setQuantity(product.getQuantity() - itemRequest.getQuantity());
+            productRepository.save(product);
+
             float itemTotal = product.getPrice() * itemRequest.getQuantity();
             totalAmount += itemTotal;
         }
@@ -70,9 +82,10 @@ public class OrderService {
         notification.setRead(false);
         notificationRepository.save(notification);
 
-        // Create order items
+        // Loop 2: Create Order Items
         for (OrderItemRequest itemRequest : items) {
             Product product = productRepository.findById(itemRequest.getProductId()).get();
+
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(savedOrder);
             orderItem.setProduct(product);
@@ -118,4 +131,3 @@ public class OrderService {
         public void setQuantity(Integer quantity) { this.quantity = quantity; }
     }
 }
-

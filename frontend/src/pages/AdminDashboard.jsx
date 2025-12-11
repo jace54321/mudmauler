@@ -893,7 +893,7 @@ const OrdersTab = () => {
                                                             </span>
                                                             {item.product && (
                                                                 <span className="product-price">
-                                                                    @ ₱{item.unitPrice?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                                    ₱{item.unitPrice?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                                                 </span>
                                                             )}
                                                         </div>

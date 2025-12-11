@@ -1,97 +1,89 @@
-// src/components/ProductModal.jsx (UPDATED)
-import React from 'react';
-import '../styles/ProductModal.css';
+import React, { useEffect } from 'react';
+import '../styles/shop.css';
 
-export default function ProductModal({ product, onClose, onAddToCart }) {
-    if (!product) {
-        return null;
-    }
+const Icons = {
+    Close: () => (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    )
+};
 
-    const handleModalAddToCart = () => {
-        onAddToCart(product);
-        // Note: Closing the modal immediately after adding to cart is good UX 
-        // if the user gets a visible success notification (toast).
-        onClose();
+const ProductModal = ({ product, onClose, onAddToCart }) => {
+    // Prevent background scrolling
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
+    if (!product) return null;
+
+    const handleOverlayClick = (e) => {
+        if (e.target.classList.contains('product-modal-overlay')) {
+            onClose();
+        }
     };
-    
-    // Helper for price formatting (Consistent with ProductCard)
-    const formattedPrice = product.price.toLocaleString("en-PH", {
+
+    const formattedPrice = product.price?.toLocaleString("en-PH", {
         style: "currency",
         currency: "PHP",
         minimumFractionDigits: 2
     });
 
-
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            {/* Prevent clicks inside the modal from closing the modal */}
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="product-modal-overlay" onClick={handleOverlayClick}>
+            <div className="product-modal-content">
 
-                {/* Close Button (X) */}
                 <button className="modal-close-btn" onClick={onClose}>
-                    &times;
+                    <Icons.Close />
                 </button>
 
-                {/* Main Body Layout */}
-                <div className="modal-body-layout">
+                {/* LEFT SIDE: Image */}
+                <div className="modal-image-section">
+                    <img
+                        src={product.image || product.imageUrl}
+                        alt={product.name}
+                        className="modal-product-image"
+                    />
+                    {product.stock <= 0 && (
+                        <div className="modal-stock-badge">OUT OF STOCK</div>
+                    )}
+                </div>
 
-                    {/* Left Side: Image & Add to Cart */}
-                    <div className="product-visual-section">
-                        {/* --- IMAGE DISPLAY FIX --- */}
-                        <div className="image-wrapper">
-                            <img 
-                                src={product.image} 
-                                alt={product.name} 
-                                className="product-modal-image" 
-                            />
-                        </div>
-                        {/* ------------------------- */}
-
-                        {/* Add to Cart button */}
-                        <button
-                            className="add-to-cart-modal-btn"
-                            onClick={handleModalAddToCart}
-                        >
-                            Add to Cart
-                        </button>
+                {/* RIGHT SIDE: Info */}
+                <div className="modal-info-section">
+                    <div className="modal-header">
+                        <span className="modal-category">{product.category || "All-Terrain"}</span>
+                        <h2 className="modal-title">{product.name}</h2>
+                        <div className="modal-price">{formattedPrice}</div>
                     </div>
 
-                    {/* Right Side: Details */}
-                    <div className="product-details-section">
-
-                        {/* Product Name */}
-                        <div className="detail-line detail-name">
-                            <span className="detail-label">PRODUCT NAME</span>
-                            <span className="detail-value">{product.name}</span>
-                            <hr />
+                    <div className="modal-body">
+                        {/* Description Box */}
+                        <div className="modal-description-box">
+                            <span className="box-label">Product Description</span>
+                            <p>
+                                {product.description || "No description available for this item."}
+                            </p>
                         </div>
+                    </div>
 
-                        {/* Price */}
-                        <div className="detail-line detail-price">
-                            <span className="detail-label">PRICE</span>
-                            <span className="detail-value price-highlight">
-                                {formattedPrice} {/* Use formatted price helper */}
-                            </span>
-                            <hr />
-                        </div>
-
-                        {/* Description Area */}
-                        <p className="product-description">
-                            {product.description || "No detailed description provided for this product."}
-                        </p>
-
-                        {/* Example of adding more design details */}
-                        <div className="additional-specs">
-                            <h4>Key Features</h4>
-                            <ul>
-                                <li>All-weather traction</li>
-                                <li>Reinforced sidewalls</li>
-                                <li>Low noise performance</li>
-                            </ul>
-                        </div>
+                    <div className="modal-footer">
+                        <button
+                            className="modal-add-btn"
+                            onClick={() => onAddToCart(product)}
+                            disabled={product.stock <= 0}
+                        >
+                            {product.stock <= 0 ? "Out of Stock" : `ADD TO CART • ${formattedPrice}`}
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     );
-}
+};
+
+export default ProductModal;
