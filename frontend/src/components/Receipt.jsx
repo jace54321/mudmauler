@@ -1,44 +1,32 @@
 // src/components/Receipt.jsx
 import React, { useRef, useEffect } from 'react';
 
-// Placeholder data (Keep this or replace with real props)
-const MOCK_RECEIPT_DATA = {
-  orderId: 'ORD-20251211-54321',
-  date: new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }),
-  items: [
-    { name: 'Vintage T-Shirt:', price: 25.99, quantity: 1 },
-    { name: 'Minimalist Sneakers:', price: 89.99, quantity: 1 },
-    { name: 'Leather Wallet:    ', price: 45.00, quantity: 2 },
-  ],
-  subtotal: 205.98,
-  shipping: 5.00,
-  tax: 15.45,
-  total: 226.43,
-};
-
 // RECEIPT COMPONENT
-const Receipt = ({ receiptData = MOCK_RECEIPT_DATA, onElementReady }) => {
-  const { orderId, date, items, subtotal, shipping, tax, total } = receiptData;
-  const receiptRef = useRef(null); // Ref to target the div
+const Receipt = ({ receiptData, onElementReady }) => {
+  // Destructure all expected fields, including the new ones
+  const {
+    orderId, date, items, subtotal, shipping, tax, total,
+    paymentMethod, shippingAddress, taxRate
+  } = receiptData;
 
-  const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
+  const receiptRef = useRef(null);
+
+  // Use the same PHP formatting function from the checkout page
+  const formatCurrency = (amount) =>
+    amount.toLocaleString("en-PH", {
+        style: "currency",
+        currency: "PHP",
+        minimumFractionDigits: 2
+    });
 
   useEffect(() => {
-      // Once the component (and its DOM element) is mounted,
-      // pass the DOM reference and Order ID up to the modal
       if (onElementReady && receiptRef.current) {
           onElementReady(receiptRef.current, orderId);
       }
-  }, [onElementReady, orderId]); // Re-run if props change
+  }, [onElementReady, orderId]);
 
   return (
-    // Attach the ref to the root element you want to capture
     <div className="receipt-card" ref={receiptRef}>
-      {/* ... Existing Receipt JSX Structure ... */}
       <h2>🧾 Order Receipt</h2>
 
       <div className="receipt-header">
@@ -46,7 +34,15 @@ const Receipt = ({ receiptData = MOCK_RECEIPT_DATA, onElementReady }) => {
         <p><strong>Date:</strong> {date}</p>
       </div>
 
+      {/* NEW: Payment and Shipping Details */}
+      <div className="receipt-details-section">
+          <p><strong>Paid Via:</strong> {paymentMethod || 'Credit/Debit Card'}</p>
+          <p className="shipping-address-text">
+            <strong>Ship To:</strong> {shippingAddress || 'Address not recorded'}
+          </p>
+      </div>
       <hr />
+
       {/* Itemized List */}
       <div className="receipt-items">
         <div className="item-row header-row">
@@ -55,7 +51,7 @@ const Receipt = ({ receiptData = MOCK_RECEIPT_DATA, onElementReady }) => {
           <span className="right-align">Price</span>
         </div>
         {items.map((item, index) => (
-          <div key={index} className="item-row">
+          <div key={index} className="item-row" data-name={item.name}>
             <span className="item-name">{item.name}</span>
             <span className="right-align">{item.quantity}</span>
             <span className="right-align">
@@ -65,22 +61,23 @@ const Receipt = ({ receiptData = MOCK_RECEIPT_DATA, onElementReady }) => {
         ))}
       </div>
       <hr />
+
       {/* Totals Section */}
       <div className="receipt-totals">
         <div className="total-row">
-          <span>Subtotal:</span>
+          <span>Sub-total</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
         <div className="total-row">
-          <span>Shipping:</span>
+          <span>Shipping</span>
           <span>{formatCurrency(shipping)}</span>
         </div>
         <div className="total-row">
-          <span>Tax:</span>
+          <span>Tax ({Math.round(taxRate * 100)}%)</span>
           <span>{formatCurrency(tax)}</span>
         </div>
         <div className="total-row grand-total">
-          <strong>Total Paid:</strong>
+          <strong>Total Paid</strong>
           <strong>{formatCurrency(total)}</strong>
         </div>
       </div>

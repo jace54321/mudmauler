@@ -1,31 +1,34 @@
 // src/pages/Purchased.jsx
-import React, { useState } from 'react'; // Import useState
-import { Link } from 'react-router-dom';
-import ReceiptModal from '../components/ReceiptModal'; // Import the new modal
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation
+import ReceiptModal from '../components/ReceiptModal';
 import '../styles/Purchased.css';
 
 const Purchased = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation();
 
-  // Define the mock data here so it can be passed to the modal
-  const MOCK_RECEIPT_DATA = {
-    orderId: 'ORD-20251211-54321',
-    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-    items: [
-        { name: 'Vintage T-Shirt', price: 25.99, quantity: 1 },
-        { name: 'Minimalist Sneakers', price: 89.99, quantity: 1 },
-        { name: 'Leather Wallet', price: 45.00, quantity: 2 },
-    ],
-    subtotal: 205.98,
-    shipping: 5.00,
-    tax: 15.45,
-    total: 226.43,
+  // Retrieve the receiptData passed from CheckoutPage, or fallback
+  const checkoutReceiptData = location.state ? location.state.receiptData : null;
+
+  // Fallback data structure for safety
+  const receiptDataToUse = checkoutReceiptData || {
+      orderId: 'N/A',
+      date: 'N/A',
+      items: [],
+      subtotal: 0,
+      shipping: 0,
+      tax: 0,
+      total: 0,
+      paymentMethod: 'Unknown',
+      shippingAddress: 'N/A',
+      taxRate: 0
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="purchased-container">
-      <div className="success-card-single"> {/* Adjusted class for single column */}
+      <div className="success-card-single">
 
         {/* Success Icon */}
         <div className="checkmark-circle">
@@ -35,7 +38,7 @@ const Purchased = () => {
         <h1>THANK YOU!</h1>
         <p>Your purchase was successful. Click the button below to view and download your receipt.</p>
 
-        {/* NEW BUTTON TO OPEN MODAL */}
+        {/* Button to open Modal */}
         <button
           className="btn-view-receipt"
           onClick={() => setIsModalOpen(true)}
@@ -49,11 +52,11 @@ const Purchased = () => {
         </Link>
       </div>
 
-      {/* The Modal Component */}
+      {/* The Modal Component - Pass the dynamic data */}
       <ReceiptModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        receiptData={MOCK_RECEIPT_DATA}
+        receiptData={receiptDataToUse} // Pass the dynamic data
       />
     </div>
   );
