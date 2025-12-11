@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../data/products"; // Import categories for the dropdown
 import {
@@ -28,6 +28,58 @@ ChartJS.register(
     Tooltip,
     Legend
 );
+
+// --- Custom Hook for Sorting (Used in all tabs) ---
+const useSortableData = (items, config = null) => {
+    const [sortConfig, setSortConfig] = useState(config);
+
+    const sortedItems = useMemo(() => {
+        let sortableItems = [...items];
+        if (sortConfig !== null) {
+            sortableItems.sort((a, b) => {
+                let aValue = a[sortConfig.key];
+                let bValue = b[sortConfig.key];
+
+                // Special handling for nested or calculated fields (like total amount)
+                if (sortConfig.key === 'totalAmount' || sortConfig.key === 'price') {
+                    aValue = aValue || 0;
+                    bValue = bValue || 0;
+                } else if (sortConfig.key === 'name' || sortConfig.key === 'email' || sortConfig.key === 'category') {
+                     // Convert to lowercase for case-insensitive string comparison
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                } else if (sortConfig.key === 'productName') {
+                    aValue = String(a.product?.name || a.name).toLowerCase();
+                    bValue = String(b.product?.name || b.name).toLowerCase();
+                } else if (sortConfig.key === 'userName') {
+                    aValue = String(a.firstName + ' ' + a.lastName).toLowerCase();
+                    bValue = String(b.firstName + ' ' + b.lastName).toLowerCase();
+                }
+                
+                if (aValue < bValue) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [items, sortConfig]);
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    return { items: sortedItems, requestSort, sortConfig };
+};
+
+// --- Main Admin Dashboard Component ---
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -159,7 +211,7 @@ const AdminDashboard = () => {
     );
 };
 
-// Dashboard Tab Component
+// Dashboard Tab Component (No changes needed here)
 const DashboardTab = ({ stats }) => {
     const [notifications, setNotifications] = useState([]);
     const [activeChartTab, setActiveChartTab] = useState("users");
@@ -226,7 +278,7 @@ const DashboardTab = ({ stats }) => {
         return found ? found.label : catKey;
     };
 
-    // Line Chart Data - Revenue Over Time
+    // Line Chart Data - Revenue Over Time (Assuming this is placeholder for now)
     const revenueData = stats.revenueOverTime || [];
     const lineChartData = {
         labels: revenueData.map(item => item.date),
@@ -413,6 +465,7 @@ const DashboardTab = ({ stats }) => {
                             </button>
                         </div>
                         <div className="chart-wrapper">
+                            {/* Assuming revenueData is a generic placeholder for all line charts */}
                             {activeChartTab === "users" && (
                                 <Line data={lineChartData} options={chartOptions} />
                             )}
@@ -427,14 +480,14 @@ const DashboardTab = ({ stats }) => {
 
                     <div className="charts-row">
                         <div className="chart-card">
-                            <h3>Manage Orders</h3>
+                            <h3>Orders by Category</h3>
                             <div className="chart-wrapper">
                                 <Bar data={barChartData} options={chartOptions} />
                             </div>
                         </div>
 
                         <div className="chart-card">
-                            <h3>Traffic by Location</h3>
+                            <h3>Product Distribution</h3>
                             <div className="chart-wrapper">
                                 <Pie data={pieChartData} options={pieChartOptions} />
                             </div>
@@ -471,7 +524,7 @@ const DashboardTab = ({ stats }) => {
     );
 };
 
-// --- UPDATED PRODUCTS TAB ---
+// --- UPDATED PRODUCTS TAB (with Sorting) ---
 const ProductsTab = ({ setAlert }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -479,7 +532,6 @@ const ProductsTab = ({ setAlert }) => {
     const [previousProduct, setPreviousProduct] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
 
-    // UPDATED: Added quantity to form state
     const [formData, setFormData] = useState({
         name: "",
         price: "",
@@ -487,7 +539,7 @@ const ProductsTab = ({ setAlert }) => {
         description: "",
         imageUrl: "",
         size: "",
-        quantity: "" // New quantity field
+        quantity: ""
     });
 
     useEffect(() => {
@@ -508,6 +560,9 @@ const ProductsTab = ({ setAlert }) => {
         }
     };
 
+    // Apply sorting logic
+    const { items: sortedProducts, requestSort, sortConfig } = useSortableData(products, { key: 'productId', direction: 'ascending' });
+
     // Helper function to get the readable label from the category key
     const getCategoryLabel = (catKey) => {
         const found = categories.find(c => c.key === catKey);
@@ -522,7 +577,6 @@ const ProductsTab = ({ setAlert }) => {
             : 'http://localhost:8080/api/admin/products';
         const method = editingProduct ? 'PUT' : 'POST';
 
-        // UPDATED: Include quantity in payload
         const productData = {
             name: formData.name,
             price: parseFloat(formData.price),
@@ -530,7 +584,7 @@ const ProductsTab = ({ setAlert }) => {
             description: formData.description,
             imageUrl: formData.imageUrl,
             size: formData.size,
-            quantity: parseInt(formData.quantity) || 0 // Parse integer for stock
+            quantity: parseInt(formData.quantity) || 0
         };
 
         try {
@@ -545,7 +599,6 @@ const ProductsTab = ({ setAlert }) => {
 
             if (response.ok) {
                 if (editingProduct && previousProduct) {
-                    // Show undo alert for edit
                     setAlert({
                         type: 'info',
                         message: `Product "${formData.name}" updated successfully`,
@@ -564,7 +617,7 @@ const ProductsTab = ({ setAlert }) => {
                                         description: previousProduct.description,
                                         imageUrl: previousProduct.imageUrl,
                                         size: previousProduct.size,
-                                        quantity: previousProduct.quantity // Undo quantity too
+                                        quantity: previousProduct.quantity
                                     })
                                 });
                                 if (undoResponse.ok) {
@@ -590,10 +643,8 @@ const ProductsTab = ({ setAlert }) => {
     };
 
     const handleEdit = (product) => {
-        // Store previous product state for undo
         setPreviousProduct({ ...product });
         setEditingProduct(product);
-        // UPDATED: Load existing stock into form
         setFormData({
             name: product.name || "",
             price: product.price || "",
@@ -606,7 +657,6 @@ const ProductsTab = ({ setAlert }) => {
         setShowAddForm(true);
     };
 
-    // includes undo functionality
     const handleDelete = async (productId) => {
         const product = products.find(p => p.productId === productId);
         if (!product) return;
@@ -624,7 +674,6 @@ const ProductsTab = ({ setAlert }) => {
 
                 fetchProducts();
 
-                // Show undo alert
                 setAlert({
                     type: 'warning',
                     message: `Product "${deletedProduct.name}" deleted`,
@@ -664,6 +713,11 @@ const ProductsTab = ({ setAlert }) => {
             });
             setTimeout(() => setAlert(null), 3000);
         }
+    };
+
+    const getSortIndicator = (key) => {
+        if (sortConfig.key !== key) return ' ';
+        return sortConfig.direction === 'ascending' ? '▲' : '▼';
     };
 
     if (loading) return <div>Loading products...</div>;
@@ -720,7 +774,7 @@ const ProductsTab = ({ setAlert }) => {
                             </select>
 
                             {/* UPDATED: Flex row for Price and Stock Qty */}
-                            <div style={{display:'flex', gap:'10px'}}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
                                 <input
                                     type="number"
                                     placeholder="Price"
@@ -773,22 +827,33 @@ const ProductsTab = ({ setAlert }) => {
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Stock</th> {/* UPDATED: New Stock Column */}
-                            <th>Category</th>
-                            <th>Size</th>
+                            <th onClick={() => requestSort('productId')}>
+                                ID {getSortIndicator('productId')}
+                            </th>
+                            <th onClick={() => requestSort('name')}>
+                                Name {getSortIndicator('name')}
+                            </th>
+                            <th onClick={() => requestSort('price')}>
+                                Price {getSortIndicator('price')}
+                            </th>
+                            <th onClick={() => requestSort('quantity')}>
+                                Stock {getSortIndicator('quantity')}
+                            </th>
+                            <th onClick={() => requestSort('category')}>
+                                Category {getSortIndicator('category')}
+                            </th>
+                            <th onClick={() => requestSort('size')}>
+                                Size {getSortIndicator('size')}
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(product => (
+                        {sortedProducts.map(product => (
                             <tr key={product.productId}>
                                 <td>{product.productId}</td>
                                 <td>{product.name}</td>
                                 <td>₱{product.price?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                                {/* UPDATED: Stock Cell with conditional color */}
                                 <td style={{ color: (!product.quantity || product.quantity === 0) ? 'red' : 'inherit', fontWeight: (!product.quantity || product.quantity === 0) ? 'bold' : 'normal' }}>
                                     {product.quantity !== undefined ? product.quantity : '0'}
                                 </td>
@@ -807,7 +872,7 @@ const ProductsTab = ({ setAlert }) => {
     );
 };
 
-// Orders Tab Component
+// --- UPDATED ORDERS TAB (with Sorting) ---
 const OrdersTab = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -824,13 +889,76 @@ const OrdersTab = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setOrders(data);
+                // Add calculated fields for sorting
+                const ordersWithCalculatedFields = data.map(order => ({
+                    ...order,
+                    // Pre-calculate total quantity for easy sorting
+                    totalQuantity: order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0,
+                    // Parse Date to be sortable
+                    orderDateValue: new Date(order.orderDate).getTime(),
+                    // Flatten user name for sorting
+                    userName: `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim(),
+                }));
+                setOrders(ordersWithCalculatedFields);
             }
         } catch (error) {
             console.error("Error fetching orders:", error);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Use a custom sort function tailored for the orders tab
+    const useOrdersSortableData = (items, config = null) => {
+        const [sortConfig, setSortConfig] = useState(config);
+
+        const sortedItems = useMemo(() => {
+            let sortableItems = [...items];
+            if (sortConfig !== null) {
+                sortableItems.sort((a, b) => {
+                    let aValue = a[sortConfig.key];
+                    let bValue = b[sortConfig.key];
+                    
+                    // Specific sorting logic for orders keys
+                    if (sortConfig.key === 'totalAmount' || sortConfig.key === 'totalQuantity' || sortConfig.key === 'orderDateValue') {
+                        aValue = aValue || 0;
+                        bValue = bValue || 0;
+                    } else if (sortConfig.key === 'userName') {
+                        aValue = (a.user?.firstName + ' ' + a.user?.lastName).toLowerCase();
+                        bValue = (b.user?.firstName + ' ' + b.user?.lastName).toLowerCase();
+                    } else if (sortConfig.key === 'orderId') {
+                        aValue = parseInt(aValue);
+                        bValue = parseInt(bValue);
+                    }
+
+                    if (aValue < bValue) {
+                        return sortConfig.direction === 'ascending' ? -1 : 1;
+                    }
+                    if (aValue > bValue) {
+                        return sortConfig.direction === 'ascending' ? 1 : -1;
+                    }
+                    return 0;
+                });
+            }
+            return sortableItems;
+        }, [items, sortConfig]);
+
+        const requestSort = (key) => {
+            let direction = 'ascending';
+            if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+                direction = 'descending';
+            }
+            setSortConfig({ key, direction });
+        };
+
+        return { items: sortedItems, requestSort, sortConfig };
+    };
+
+    const { items: sortedOrders, requestSort, sortConfig } = useOrdersSortableData(orders, { key: 'orderDateValue', direction: 'descending' });
+
+    const getSortIndicator = (key) => {
+        if (sortConfig.key !== key) return ' ';
+        return sortConfig.direction === 'ascending' ? '▲' : '▼';
     };
 
     if (loading) return <div>Loading orders...</div>;
@@ -842,25 +970,34 @@ const OrdersTab = () => {
                 <table>
                     <thead>
                         <tr>
-                            <th>Order Date</th>
-                            <th>Order ID</th>
-                            <th>User</th>
+                            <th onClick={() => requestSort('orderDateValue')}>
+                                Order Date {getSortIndicator('orderDateValue')}
+                            </th>
+                            <th onClick={() => requestSort('orderId')}>
+                                Order ID {getSortIndicator('orderId')}
+                            </th>
+                            <th onClick={() => requestSort('userName')}>
+                                User {getSortIndicator('userName')}
+                            </th>
                             <th>Products</th>
-                            <th>Total Quantity</th>
-                            <th>Total Amount</th>
+                            <th onClick={() => requestSort('totalQuantity')}>
+                                Total Qty {getSortIndicator('totalQuantity')}
+                            </th>
+                            <th onClick={() => requestSort('totalAmount')}>
+                                Total Amount {getSortIndicator('totalAmount')}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.length === 0 ? (
+                        {sortedOrders.length === 0 ? (
                             <tr>
                                 <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                                     No orders found
                                 </td>
                             </tr>
                         ) : (
-                            orders.map(order => {
+                            sortedOrders.map(order => {
                                 const items = order.items || [];
-                                const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
                                 return (
                                     <tr key={order.orderId}>
@@ -903,7 +1040,7 @@ const OrdersTab = () => {
                                                 <span style={{ color: '#999' }}>No items</span>
                                             )}
                                         </td>
-                                        <td><strong>{totalQuantity}</strong></td>
+                                        <td><strong>{order.totalQuantity}</strong></td>
                                         <td>
                                             <strong style={{ color: '#10b981', fontSize: '16px' }}>
                                                 ₱{order.totalAmount?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
@@ -920,7 +1057,7 @@ const OrdersTab = () => {
     );
 };
 
-// Users Tab Component
+// --- UPDATED USERS TAB (with Sorting) ---
 const UsersTab = ({ setAlert }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -937,7 +1074,12 @@ const UsersTab = ({ setAlert }) => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setUsers(data);
+                // Add a combined name for sorting
+                const usersWithCombinedName = data.map(user => ({
+                    ...user,
+                    fullName: `${user.firstName} ${user.lastName}`
+                }));
+                setUsers(usersWithCombinedName);
             }
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -945,6 +1087,9 @@ const UsersTab = ({ setAlert }) => {
             setLoading(false);
         }
     };
+
+    // Apply sorting logic
+    const { items: sortedUsers, requestSort, sortConfig } = useSortableData(users, { key: 'fullName', direction: 'ascending' });
 
     const handleRoleChange = async (userId, newRole) => {
         const sessionId = localStorage.getItem("sessionId");
@@ -1025,6 +1170,11 @@ const UsersTab = ({ setAlert }) => {
         }
     };
 
+    const getSortIndicator = (key) => {
+        if (sortConfig.key !== key) return ' ';
+        return sortConfig.direction === 'ascending' ? '▲' : '▼';
+    };
+
     if (loading) return <div>Loading users...</div>;
 
     return (
@@ -1034,16 +1184,26 @@ const UsersTab = ({ setAlert }) => {
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Role</th>
+                            <th onClick={() => requestSort('id')}>
+                                ID {getSortIndicator('id')}
+                            </th>
+                            <th onClick={() => requestSort('fullName')}>
+                                Name {getSortIndicator('fullName')}
+                            </th>
+                            <th onClick={() => requestSort('email')}>
+                                Email {getSortIndicator('email')}
+                            </th>
+                            <th onClick={() => requestSort('phone')}>
+                                Phone {getSortIndicator('phone')}
+                            </th>
+                            <th onClick={() => requestSort('role')}>
+                                Role {getSortIndicator('role')}
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(user => (
+                        {sortedUsers.map(user => (
                             <tr key={user.id}>
                                 <td>{user.id}</td>
                                 <td>{user.firstName} {user.lastName}</td>

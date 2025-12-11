@@ -1,57 +1,66 @@
 package com.example.mudmauler.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "ProductImage")
+@Table(name = "product_images") // Renamed table for clarity (standard naming convention)
 public class ProductImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id; // Changed type to Long for consistency
 
-    @Column(name = "ProductID", nullable = false)
-    private int productId;
+    // --- REPLACED: Raw ProductID with a proper @ManyToOne relationship ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnore // Important to prevent infinite recursion
+    private Product product;
+    // --------------------------------------------------------------------
 
-    @Column(name = "ImageID", nullable = false)
-    private int imageId;
+    @Column(name = "Image_URL", nullable = false)
+    private String imageUrl; // Added a field to store the image URL/path
 
     @Column(name = "DisplayOrder")
-    private int displayOrder;
+    private Integer displayOrder; // Changed type to Integer for consistency
+    
+    // --- REMOVED: imageId (It's redundant; the image URL/path is what matters)
 
     public ProductImage() {}
 
-    public ProductImage(int productId, int imageId, int displayOrder) {
-        this.productId = productId;
-        this.imageId = imageId;
+    // Constructor updated
+    public ProductImage(Product product, String imageUrl, Integer displayOrder) {
+        this.product = product;
+        this.imageUrl = imageUrl;
         this.displayOrder = displayOrder;
     }
 
-    public int getId() {
+    // Getters and Setters
+    public Long getId() {
         return id;
     }
 
-    public int getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+    
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
-    public int getImageId() {
-        return imageId;
-    }
-
-    public void setImageId(int imageId) {
-        this.imageId = imageId;
-    }
-
-    public int getDisplayOrder() {
+    public Integer getDisplayOrder() {
         return displayOrder;
     }
 
-    public void setDisplayOrder(int displayOrder) {
+    public void setDisplayOrder(Integer displayOrder) {
         this.displayOrder = displayOrder;
     }
 }

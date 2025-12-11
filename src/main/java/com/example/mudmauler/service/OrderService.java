@@ -92,7 +92,9 @@ public class OrderService {
             orderItem.setQuantity(itemRequest.getQuantity());
             orderItem.setUnitPrice(product.getPrice());
             orderItem.setTotalAmount(product.getPrice() * itemRequest.getQuantity());
-            orderItem.setImageId(product.getImageId());
+            // The method getImageId() is undefined for the type Product, so this line is removed or fixed.
+            // If Product has an 'image' property or similar, fetch accordingly. 
+            // Example: orderItem.setImageId(product.getImage() != null ? product.getImage().getId() : null);
             orderItemRepository.save(orderItem);
         }
 
